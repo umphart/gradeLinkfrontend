@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarWeek, FaClipboardCheck, FaDatabase, FaHSquare, FaRegListAlt } from 'react-icons/fa';
 import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 
 const AddExams = () => {
   const navigate = useNavigate();
@@ -14,12 +15,12 @@ const AddExams = () => {
 
   return (
     <Box sx={{ p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9fafb', borderRadius: 3 }}>
-      <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', top: 16, left: 16, color: '#3347B0' }}>
-        ⬅️
-      </IconButton>
+    <IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+  <ArrowBack />
+</IconButton>
 
       <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', color: '#3347B0', mb: 1 }}>
-        Manage Exams
+        Add Exams
       </Typography>
       <Typography variant="subtitle1" align="center" sx={{ mb: 4, color: '#666' }}>
         Handle exam records for all terms.

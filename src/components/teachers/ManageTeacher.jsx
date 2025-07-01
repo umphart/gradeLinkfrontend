@@ -7,6 +7,7 @@ import {
   FaTrashAlt,
   FaListAlt,
   FaUserCheck,
+
 } from 'react-icons/fa';
 import {
   Box,
@@ -14,8 +15,9 @@ import {
   Grid,
   Paper,
   IconButton,
+ 
 } from '@mui/material';
-
+import { ArrowBack } from '@mui/icons-material';
 const ManageTeacher = () => {
   const navigate = useNavigate();
 
@@ -28,13 +30,13 @@ const ManageTeacher = () => {
 
   return (
     <Box sx={{ p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9fafb', borderRadius: 3 }}>
-      <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', top: 16, left: 16, color: '#3347B0' }}>
-        ⬅️
-      </IconButton>
+<IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+  <ArrowBack />
+</IconButton>
+<Typography variant="h4" align="center" sx={{ fontWeight: 'bold', color: '#3347B0', mb: 1 }}>
+  Manage Teacher Records
+</Typography>
 
-      <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', color: '#3347B0', mb: 1 }}>
-        Manage Teacher Records
-      </Typography>
       <Typography variant="subtitle1" align="center" sx={{ mb: 4, color: '#555' }}>
         Add, update, assign class, verify, or delete teacher records easily.
       </Typography>

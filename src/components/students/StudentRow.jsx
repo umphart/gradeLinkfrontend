@@ -1,10 +1,10 @@
 import React, { useState } from 'react'; 
 import { TableRow, TableCell, Button, Avatar, Box, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { Edit as EditIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
-import { Link } from 'react-router-dom';
-
 const StudentRow = ({ student, onSave }) => {
-  const { id, full_name, admission_number, class_name, gender, section, age, guidance_name, guidance_contact, photo_url } = student;
+
+  
+  const { id, full_name, admission_number, class_name, gender, section, age, guidance_name, guidance_contact, disability_status, photo_url } = student;
 
   // Modal visibility state
   const [open, setOpen] = useState(false);
@@ -19,7 +19,8 @@ const StudentRow = ({ student, onSave }) => {
     section: section || '',
     age: age || '',
     guidance_name: guidance_name || '',
-    guidance_contact: guidance_contact || ''
+    guidance_contact: guidance_contact || '',
+    disability_status: disability_status || '',
   });
 
   const handleOpenModal = (editMode = false) => {
@@ -62,6 +63,7 @@ const StudentRow = ({ student, onSave }) => {
          <TableCell>{section || 'N/A'}</TableCell>
         <TableCell>{class_name || 'N/A'}</TableCell>
         <TableCell>{gender}</TableCell>
+        <TableCell>{disability_status}</TableCell>
         <TableCell>{guidance_contact || 'N/A'}</TableCell>
         <TableCell>
           <Button
@@ -157,6 +159,14 @@ const StudentRow = ({ student, onSave }) => {
                   onChange={handleInputChange}
                 />
                 <TextField
+                  label="disability_status"
+                  variant="outlined"
+                  sx={{ width: '80%' }} // Reduced width
+                  name="disability_status"
+                  value={formData.disability_status}
+                  onChange={handleInputChange}
+                />
+                <TextField
                   label="Guardian Contact"
                   variant="outlined"
                   sx={{ width: '80%' }} // Reduced width
@@ -199,6 +209,10 @@ const StudentRow = ({ student, onSave }) => {
                 <Box display="flex" width="100%" py={0.5} sx={{ borderBottom: '1px solid #eee' }}>
                   <Box width="40%" sx={{ fontWeight: 'bold' }}>Age:</Box>
                   <Box width="60%">{formData.age}</Box>
+                </Box>
+                                <Box display="flex" width="100%" py={0.5} sx={{ borderBottom: '1px solid #eee' }}>
+                  <Box width="40%" sx={{ fontWeight: 'bold' }}>Disability Status:</Box>
+                  <Box width="60%">{formData.disability_status}</Box>
                 </Box>
                 <Box display="flex" width="100%" py={0.5} sx={{ borderBottom: '1px solid #eee' }}>
                   <Box width="40%" sx={{ fontWeight: 'bold' }}>Guardian Name:</Box>

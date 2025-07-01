@@ -3,7 +3,7 @@ import {
   Box, Button, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, TextField, Dialog, DialogTitle, DialogContent,
   DialogActions, Grid, Avatar, InputAdornment, CircularProgress,
-  IconButton, Snackbar, Alert
+  IconButton, Snackbar, Alert, Backdrop
 } from '@mui/material';
 import {
   Add as AddIcon, Search as SearchIcon, Close as CloseIcon,
@@ -16,6 +16,7 @@ import StudentRow from '../components/students/StudentRow';
 const Students = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState('');
@@ -139,12 +140,12 @@ const Students = () => {
       form.append('photo', newStudent.photo);
     }
 
+    setRegistering(true);
     try {
       const response = await addStudent(form);
       setSnackbarMessage(`Student added successfully! Admission Number: ${response.data.admissionNumber}`);
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
-
       handleModalClose();
       const data = await getStudents();
       setStudents(data);
@@ -157,6 +158,8 @@ const Students = () => {
       setSnackbarMessage(`Error: ${errorMessage}`);
       setSnackbarSeverity('error');
       setOpenSnackbar(true);
+    } finally {
+      setRegistering(false);
     }
   };
 
@@ -164,14 +167,30 @@ const Students = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-        <CircularProgress />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          background: 'linear-gradient(to right, #ece9e6, #ffffff)',
+        }}
+      >
+        <CircularProgress size={60} thickness={5} color="primary" />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, position: 'relative' }}>
+      {/* Backdrop Loader for Registering */}
+      <Backdrop
+        open={registering}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, color: '#fff' }}
+      >
+        <CircularProgress color="inherit" size={60} thickness={5} />
+      </Backdrop>
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 600 }}>Student Management</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setModalOpen(true)}>
@@ -206,6 +225,7 @@ const Students = () => {
                 <TableCell>Section</TableCell>
                 <TableCell>Class</TableCell>
                 <TableCell>Gender</TableCell>
+                <TableCell>Disability Status</TableCell>
                 <TableCell>Guidance Contact</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -217,7 +237,7 @@ const Students = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={8} align="center">
                     {searchTerm ? 'No matching students found' : 'No students available'}
                   </TableCell>
                 </TableRow>
@@ -244,7 +264,7 @@ const Students = () => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent>
+        <DialogContent sx={{ backgroundColor: '#f9f9f9', borderRadius: 1, p: 3 }}>
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <Avatar
               src={newStudent.photo ? URL.createObjectURL(newStudent.photo) : ''}

@@ -1,4 +1,7 @@
+// TransferStudent.jsx (list page)
+
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Typography,
   Box,
@@ -14,30 +17,52 @@ import {
 } from '@mui/material';
 import { TransferWithinAStation } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 
 const TransferStudent = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredStudents, setFilteredStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  // Fetch students (replace with actual API endpoint)
-  useEffect(() => {
+useEffect(() => {
+    const schoolData = JSON.parse(localStorage.getItem('school') || '{}');
+    const schoolName = schoolData.name || '';
+
+    if (!schoolName) {
+      console.warn('No school name found in localStorage.');
+      return;
+    }
+
     const fetchStudents = async () => {
       try {
-        const response = await fetch('https://api.example.com/students'); // <-- Replace with actual API
-        const data = await response.json();
-        setStudents(data);
-        setFilteredStudents(data);
+        setLoading(true);
+        const response = await axios.get('http://localhost:5000/api/students/students', {
+          params: { schoolName }
+        });
+        const data = response.data;
+
+        if (data.success) {
+          const { junior = [], primary = [], senior = [] } = data.students;
+          const allStudents = [...junior, ...primary, ...senior];
+          setStudents(allStudents);
+          setFilteredStudents(allStudents);
+        } else {
+          console.error('Error fetching students:', data.message);
+        }
       } catch (error) {
-        console.error('Error fetching students:', error);
+        console.error('Failed to fetch students:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchStudents();
   }, []);
 
-  // Filter students by name, admission number, or class
+
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
@@ -49,22 +74,22 @@ const TransferStudent = () => {
     );
     setFilteredStudents(filtered);
   };
-
-  // Navigate to transfer student form with selected ID
-  const handleTransferClick = (studentId) => {
-    navigate(`/admin/transfer-student/${studentId}`);
+console.log('Filtered Students:', filteredStudents);
+  const handleTransferClick = (admissionNumber) => {
+    console.log('Transferring student with admission number:', admissionNumber);
+    navigate(`/admin/transfer-student/${encodeURIComponent(admissionNumber)}`);
   };
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Transfer Student
-      </Typography>
-      <Typography variant="subtitle1" sx={{ mb: 3 }}>
-        Search and select a student to transfer to another class or school.
-      </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+  <IconButton onClick={() => navigate(-1)} color="primary">
+    <ArrowBack />
+  </IconButton>
+  <Typography variant="h5" sx={{ ml: 1 }}>Transfer Student</Typography>
+</Box>
 
-      {/* Search Bar */}
+
       <TextField
         label="Search by Name, Admission No., or Class"
         variant="outlined"
@@ -74,7 +99,6 @@ const TransferStudent = () => {
         sx={{ mb: 3 }}
       />
 
-      {/* Student Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -83,26 +107,35 @@ const TransferStudent = () => {
               <TableCell>Last Name</TableCell>
               <TableCell>Admission Number</TableCell>
               <TableCell>Class</TableCell>
+              <TableCell>Age</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredStudents.map((student) => (
               <TableRow key={student.id}>
-                <TableCell>{student.firstName}</TableCell>
-                <TableCell>{student.lastName}</TableCell>
-                <TableCell>{student.admissionNumber}</TableCell>
-                <TableCell>{student.className}</TableCell>
+    <TableCell>{student.full_name}</TableCell>
+                       <TableCell>{student.admission_number}</TableCell>
+                       <TableCell>{student.class_name}</TableCell>
+                       <TableCell>{student.section || '-'}</TableCell>
+                       <TableCell>{student.age}</TableCell>
                 <TableCell>
                   <IconButton
                     color="primary"
-                    onClick={() => handleTransferClick(student.id)}
+                    onClick={() => handleTransferClick(student.admission_number)}
                   >
                     <TransferWithinAStation />
                   </IconButton>
                 </TableCell>
               </TableRow>
             ))}
+            {filteredStudents.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  No students found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

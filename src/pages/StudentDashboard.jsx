@@ -111,7 +111,7 @@ const StudentDashboard = () => {
     primaryTypographyProps={{
       sx: {
         fontWeight: 'bold',
-        color: '#ffffff', // Change color here if needed
+        color: '#ffffff', 
       },
     }}
   />

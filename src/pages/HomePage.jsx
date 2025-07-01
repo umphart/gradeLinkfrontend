@@ -1,7 +1,14 @@
-import { Box, Button, Container, Typography, Grid } from '@mui/material';
+import React, { useEffect, useState } from 'react'; 
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import "../App.css";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Button,
+  Paper,
+  Grid,
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const HomePage = () => {
   const [schoolCount, setSchoolCount] = useState(0);
@@ -20,185 +27,189 @@ const HomePage = () => {
       });
   }, []);
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+        }}
+      >
+        <CircularProgress size={64} thickness={5} sx={{ color: '#ffffff' }} />
+      </Box>
+    );
+  }
+
   return (
-    <Container
-      maxWidth="lg"
+    <Box
       sx={{
         minHeight: '100vh',
-        py: 4,
-        background: 'linear-gradient(to right, #2980b9, #2c3e50)',
+        background: 'linear-gradient(to right, #1e3c72, #2a5298)',
         display: 'flex',
+        justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: '"Poppins", "Helvetica", "Arial", sans-serif',
       }}
     >
-      <Grid container spacing={4} justifyContent="center" alignItems="center">
-        <Grid item xs={12} md={8}>
-          <Box
-            sx={{
-              textAlign: 'center',
-              backgroundColor: 'rgba(133, 194, 212, 0.70)',
-              borderRadius: '16px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-              padding: { xs: 3, md: 4 },
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-            }}
-          >
-            <Typography 
-              variant="h3" 
-              gutterBottom 
-              sx={{ 
-                color: '#2c3e50',
-                fontWeight: 700,
-                fontFamily: '"Montserrat", sans-serif',
-                mb: 3,
-                fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' }
-              }}
-            >
-              Welcome to School Management System
-            </Typography>
-            
-            <Typography 
-              variant="h6" 
-              paragraph 
-              sx={{ 
-                color: 'white',
-                fontWeight: 500,
-                mb: 3,
-                fontSize: { xs: '1rem', md: '1.1rem' },
-                fontStyle: 'italic'
-              }}
-            >
-              <i>"Transform your school's management with our all-in-one solution - simplifying administration, 
-              enhancing student-teacher collaboration, and providing real-time insights to drive educational 
-              excellence."</i>
-            </Typography>
+    <Box sx={{ maxWidth: 1000, width: '100%', mx: 'auto' }}>
+  <Paper
+    elevation={12}
+    sx={{
+      p: { xs: 2, md: 3 },  // Reduced padding here
+      backdropFilter: 'blur(15px)',
+      background: 'rgba(255, 255, 255, 0.05)',
+      border: '1px solid rgba(255, 255, 255, 0.25)',
+      borderRadius: 8,
+      color: 'white',
+      boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+      textAlign: 'center',
+      transition: 'all 0.3s ease-in-out',
+      '&:hover': {
+        boxShadow: '0 16px 50px rgba(0,0,0,0.5)',
+      },
+    }}
+  >
+    <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ letterSpacing: 1 }}>
+      🎓 GradeLink365
+    </Typography>
 
-            <Box 
-              sx={{ 
-                my: 2,
-                textAlign: 'left',
-                px: { xs: 1, md: 3 },
-                '& > *': {
-                  mb: 1.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontSize: { xs: '0.9rem', md: '1rem' }
-                }
-              }}
-            >
-              <Typography variant="body1">✅ Register & manage multiple schools</Typography>
-              <Typography variant="body1">✅ Comprehensive student & teacher management</Typography>
-              <Typography variant="body1">✅ Real-time attendance & performance tracking</Typography>
-              <Typography variant="body1">✅ Automated report generation</Typography>
-              <Typography variant="body1">✅ Secure role-based access control</Typography>
-            </Box>
+    <Typography variant="h6" sx={{ fontStyle: 'italic', mb: 4, maxWidth: 700, mx: 'auto' }}>
+      "Transform your school's management with our all-in-one solution – simplifying
+      administration, enhancing collaboration, and delivering academic insights."
+    </Typography>
 
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                color: 'white', 
-                fontWeight: 600, 
-                mt: 3,
-                mb: 2,
-                fontSize: { xs: '1.1rem', md: '1.2rem' }
-              }}
-            ><i>
-              {loading ? 'Fetching data...' : `Currently, there are ${schoolCount} schools registered!`}
-            </i></Typography>
+    <Box sx={{ textAlign: 'left', mb: 4, ml: { xs: 1, sm: 4 }, pl: 1 }}>
+      {[
+        'Register & manage multiple schools',
+        'Student & teacher performance analytics',
+        'Secure attendance and grading system',
+        'Detailed report generation',
+        'Mobile and desktop responsive interface',
+      ].map((feature, index) => (
+        <Typography
+          key={index}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 1.2,
+            fontSize: '1rem',
+          }}
+        >
+          <CheckCircleIcon sx={{ color: '#4caf50', mr: 1 }} />
+          {feature}
+        </Typography>
+      ))}
+    </Box>
 
-            <Box 
-              sx={{ 
-                mt: 4,
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                justifyContent: 'center',
-                gap: 2,
-                '& > *': {
-                  flex: { xs: 'none', sm: 1 },
-                  textDecoration: 'none !important',
-                  '&:hover': {
-                    transform: 'translateY(-2px)'
-                  },
-                  transition: 'transform 0.3s ease'
-                }
-              }}
-            >
-              <Button
-                variant="contained"
-                size="large"
-                component={Link}
-                to="/register"
-                sx={{
-                  py: 1.5,
-                  borderRadius: '12px',
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 14px rgba(41, 128, 185, 0.4)',
-                  background: 'linear-gradient(45deg, #2980b9, #2c3e50)',
-                  '&:hover': {
-                    boxShadow: '0 6px 20px rgba(41, 128, 185, 0.6)',
-                    background: 'linear-gradient(45deg, #2c3e50, #2980b9)'
-                  }
-                }}
-              >
-                Register Your School
-              </Button>
-              
-              <Button
-                variant="outlined"
-                size="large"
-                component={Link}
-                to="/admin-login"
-                sx={{
-                  py: 1.5,
-                  borderRadius: '12px',
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  textTransform: 'none',
-                  borderWidth: '2px',
-                  borderColor: '#2980b9',
-                  color: '#2980b9',
-                  '&:hover': { 
-                    backgroundColor: 'rgba(41, 128, 185, 0.1)',
-                    borderWidth: '2px',
-                    borderColor: '#2980b9'
-                  },
-                }}
-              >
-                Admin Login
-              </Button>
-              
-              <Button
-                variant="outlined"
-                size="large"
-                component={Link}
-                to="/student-login"
-                sx={{
-                  py: 1.5,
-                  borderRadius: '12px',
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  textTransform: 'none',
-                  borderWidth: '2px',
-                  borderColor: '#27ae60',
-                  color: '#27ae60',
-                  '&:hover': { 
-                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
-                    borderWidth: '2px',
-                    borderColor: '#27ae60'
-                  },
-                }}
-              >
-                Student Login
-              </Button>
-            </Box>
-          </Box>
-        </Grid>
+    <Typography
+      variant="h6"
+      gutterBottom
+      sx={{
+        mb: 3,
+        fontWeight: 'medium',
+        background: 'rgba(255,255,255,0.1)',
+        py: 0.8,
+        borderRadius: 2,
+      }}
+    >
+      📊 <i>Currently, {schoolCount} schools are registered!</i>
+    </Typography>
+
+    <Grid container spacing={2} justifyContent="center">
+      <Grid item xs={12} sm={6}>
+        <Button
+          component={Link}
+          to="/register"
+          variant="contained"
+          fullWidth
+          sx={{
+            py: 1.1,
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            background: 'linear-gradient(to right, #43e97b, #38f9d7)',
+            color: '#000',
+            borderRadius: 3,
+            '&:hover': {
+              background: 'linear-gradient(to right, #32e37a, #32d8ce)',
+            },
+          }}
+        >
+          Register Your School
+        </Button>
       </Grid>
-    </Container>
+      <Grid item xs={12} sm={6}>
+        <Button
+          component={Link}
+          to="/admin-login"
+          variant="outlined"
+          color="success"
+          fullWidth
+          sx={{
+            py: 1.1,
+            fontWeight: 'bold',
+            color: 'white',
+            borderColor: '#66bb6a',
+             background: 'linear-gradient(to right,rgba(86, 233, 67, 0.09),rgb(14, 245, 202))',
+            borderRadius: 3,
+            '&:hover': {
+              backgroundColor: 'rgba(102, 187, 106, 0.1)',
+            },
+          }}
+        >
+          Admin Login
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Button
+          component={Link}
+          to="/student-login"
+          variant="outlined"
+          color="info"
+          fullWidth
+          sx={{
+            py: 1.1,
+            fontWeight: 'bold',
+            color: 'white',
+            borderColor: '#29b6f6',
+             background: 'linear-gradient(to right,rgb(30, 18, 194),rgb(103, 180, 170))',
+            borderRadius: 3,
+            '&:hover': {
+
+              backgroundColor: 'rgba(41, 182, 246, 0.1)',
+            },
+          }}
+        >
+          Student Login
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Button
+          component={Link}
+          to="/teacher-login"
+          fullWidth
+          sx={{
+            py: 1.1,
+            fontWeight: 'bold',
+            borderRadius: 3,
+            border: '2px solidrgb(14, 55, 187)',
+             background: 'linear-gradient(to right,rgb(92, 67, 233),rgb(249, 56, 201))',
+            color: '#FF9800',
+            '&:hover': {
+              backgroundColor: 'rgba(58, 172, 156, 0.1)',
+              color: '#E65100',
+            },
+          }}
+        >
+          Teacher Login
+        </Button>
+      </Grid>
+    </Grid>
+  </Paper>
+</Box>
+
+</Box>
   );
 };
 

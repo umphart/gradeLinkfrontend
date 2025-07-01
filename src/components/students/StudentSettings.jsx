@@ -51,7 +51,7 @@ const dashboardItems = [
 const navItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/student-dashboard' },
   { text: 'Profile', icon: <PersonIcon />, path: '/student-profile' },
-  { text: 'Check Result', icon: <AssessmentIcon />, path: '/student-results' },
+ { text: 'My Result', icon: <AssessmentIcon />, path: '/student-results' },
   { text: 'Progress', icon: <TrendingUpIcon />, path: '/student-progress' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/student-settings' },
 ];

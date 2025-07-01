@@ -6,7 +6,7 @@ export const getStudents = async () => {
   try {
     const school = JSON.parse(localStorage.getItem('school'));
     const schoolName = school?.name;
-    console.log('Fetching students for:', schoolName);
+    //console.log('Fetching students for:', schoolName);
 
     const response = await axios.get('http://localhost:5000/api/students/students', {
       params: { schoolName }
@@ -15,12 +15,7 @@ export const getStudents = async () => {
     const { primary = [], junior = [], senior = [] } = response.data.students;
     const students = [...primary, ...junior, ...senior];
 
-    // Log the students data to check their photo URL
-    students.forEach(student => {
-      console.log('Student data:', student);
-      console.log('Photo URL:', student.photo_url);  // Log photo URL
-    });
-
+  
     return students;
   } catch (error) {
     console.error('Failed to fetch students:', error);

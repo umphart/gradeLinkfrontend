@@ -25,8 +25,7 @@ const StudentLogin = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   const { admissionNumber, password } = formData;
 
@@ -48,10 +47,8 @@ const StudentLogin = () => {
       const user = response.data.user;
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Wait 2 seconds before redirecting
-      setTimeout(() => {
-        navigate('/student-dashboard');
-      }, 2000);
+      // Refresh page to fetch all related records
+      window.location.href = '/student-dashboard';
     }
   } catch (err) {
     console.error('Login error:', err);

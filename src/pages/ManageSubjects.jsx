@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlusCircle, FaEdit, FaTrash, FaList } from 'react-icons/fa';
 import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 
 const ManageSubjects = () => {
   const navigate = useNavigate();
@@ -14,10 +15,10 @@ const ManageSubjects = () => {
   ];
 
   return (
-    <Box sx={{ p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9fafb', borderRadius: 3 }}>
-      <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', top: 16, left: 16, color: '#3347B0' }}>
-        ⬅️
-      </IconButton>
+    <Box sx={{ p: 0, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9fafb', borderRadius: 3 }}>
+               <IconButton onClick={() => navigate(-1)} sx={{ mb: 0 }}>
+  <ArrowBack />
+</IconButton>
 
       <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', color: '#3347B0', mb: 1 }}>
         Manage Subjects

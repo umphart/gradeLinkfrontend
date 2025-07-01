@@ -1,0 +1,910 @@
+import {
+  Box,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
+
+const School = () => {
+ const [schools, setSchools] = useState([]);
+
+const fetchSchools = async () => {
+  try {
+    const res = await fetch('http://localhost:5000/api/school-count/all');
+    const data = await res.json();
+    setSchools(data);
+  } catch (err) {
+    console.error('Failed to fetch schools:', err);
+  }
+};
+
+useEffect(() => {
+  fetchSchools();
+}, []);
+
+const handleDelete = async (id) => {
+  if (!window.confirm('Are you sure you want to delete this school?')) return;
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/school-count/${id}`, {
+      method: 'DELETE',
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      await fetchSchools(); // 🔄 refresh the list from backend
+      alert(data.message);
+    } else {
+      console.error(data.message);
+      alert('Failed to delete school.');
+    }
+  } catch (err) {
+    console.error('Delete failed:', err);
+    alert('An error occurred while deleting the school.');
+  }
+};
+
+  const handleUpdate = (id) => {
+  };
+
+  return (
+    <Box sx={{ backgroundColor: '#f9fafb', minHeight: '100vh', padding: 4 }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ fontWeight: 'bold', color: '#3347B0', textAlign: 'center' }}
+      >
+        Super Admin Dashboard
+      </Typography>
+      <Typography
+        variant="subtitle1"
+        align="center"
+        sx={{ marginBottom: 4, color: '#555' }}
+      >
+        View and manage all registered schools.
+      </Typography>
+
+      <Paper elevation={3} sx={{ padding: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Registered Schools
+        </Typography>
+
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>School Name</strong></TableCell>
+               <TableCell><strong>School Email</strong></TableCell>
+              <TableCell><strong>School Phone</strong></TableCell>
+              <TableCell><strong>School Address</strong></TableCell>
+              <TableCell><strong>Admin Name</strong></TableCell>
+               <TableCell><strong>Admin Email</strong></TableCell>
+              <TableCell><strong>Admin Phone</strong></TableCell>
+             
+              <TableCell><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {schools.length > 0 ? (
+              schools.map((school, index) => (
+                <TableRow key={school.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{school.school_name}</TableCell>
+                  <TableCell>{school.school_email}</TableCell>
+                  <TableCell>{school.school_phone}</TableCell>
+                  <TableCell>{school.address} {school.state}</TableCell>
+                   <TableCell>{school.first_name} </TableCell>
+                  <TableCell>{school.admin_email}</TableCell>
+                   <TableCell>{school.admin_phone}</TableCell>
+
+                  <TableCell>
+<IconButton
+  color="primary"
+  size="small"
+  onClick={() => handleUpdate()}
+>
+  <EditIcon />
+</IconButton>
+
+<IconButton
+  color="error"
+  size="small"
+  onClick={() => handleDelete(school.school_id)}
+>
+  <DeleteIcon />
+</IconButton>
+
+
+
+
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  No schools found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Paper>
+    </Box>
+  );
+};
+
+export default School;
+// Full updated code for Reports.jsx with term and session support
+import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  Modal,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Snackbar,
+  Alert
+} from '@mui/material';
+import axios from 'axios';
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '80%',
+  maxHeight: '80vh',
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  display: 'flex',
+  p: 2,
+  borderRadius: 2,
+  overflowY: 'auto',
+};
+
+const Reports = () => {
+  const [studentsByClass, setStudentsByClass] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [subjects, setSubjects] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [examResults, setExamResults] = useState([]);
+  const [examForm, setExamForm] = useState({
+    subject: '',
+    exam_mark: '',
+    ca: '',
+    term_id: '',
+    session_id: ''
+  });
+  const [saving, setSaving] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
+  const [classNames, setClassNames] = useState([]);
+
+  const [alert, setAlert] = useState({ open: false, severity: 'success', message: '' });
+  const showAlert = (severity, message) => setAlert({ open: true, severity, message });
+
+  const schoolName = (() => {
+    try {
+      const schoolData = localStorage.getItem('school');
+      if (schoolData) return JSON.parse(schoolData).name || '';
+      const userData = localStorage.getItem('user');
+      if (userData) return JSON.parse(userData).schoolName || '';
+    } catch {
+      return '';
+    }
+    return '';
+  })();
+
+  useEffect(() => {
+    if (!schoolName) {
+      setLoading(false);
+      return;
+    }
+    const fetchStudents = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/students/students?schoolName=${encodeURIComponent(schoolName)}`);
+        const data = res.data.students;
+        const grouped = {};
+        Object.keys(data).forEach(section => {
+          data[section].forEach(student => {
+            const cls = student.class_name;
+            if (!grouped[cls]) grouped[cls] = [];
+            grouped[cls].push(student);
+          });
+        });
+        setStudentsByClass(grouped);
+        setClassNames(Object.keys(grouped).sort());
+        if (Object.keys(grouped).length > 0) {
+          setCurrentTab(0);
+        }
+      } catch (err) {
+        console.error('Error fetching students:', err);
+        showAlert('error', 'Failed to fetch students');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, [schoolName]);
+
+  const handleAddExam = async (student) => {
+    setSelectedStudent(student);
+    setExamForm({ subject: '', exam_mark: '', ca: '', term_id: '', session_id: '' });
+    setExamResults([]);
+    setModalOpen(true);
+    try {
+      const [subjectRes, termRes, sessionRes, examRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/subjects/all?schoolName=${encodeURIComponent(schoolName)}`),
+        axios.get(`http://localhost:5000/api/terms`),
+        axios.get(`http://localhost:5000/api/sessions`),
+        axios.get(`http://localhost:5000/api/students/exams?schoolName=${encodeURIComponent(schoolName)}&className=${encodeURIComponent(student.class_name)}&admission_number=${encodeURIComponent(student.admission_number)}`)
+      ]);
+      setSubjects(subjectRes.data.subjects || []);
+      setTerms(termRes.data.terms || []);
+      setSessions(sessionRes.data.sessions || []);
+      setExamResults(examRes.data.examResults || []);
+    } catch (err) {
+      console.error('Error fetching exam data:', err);
+      showAlert('error', 'Failed to fetch exam/subject data');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setExamForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { subject, exam_mark, ca, term_id, session_id } = examForm;
+    if (!subject || !exam_mark || !ca || !term_id || !session_id) {
+      showAlert('warning', 'Please fill all fields');
+      return;
+    }
+    const examData = [{
+      student_name: selectedStudent.full_name,
+      admission_number: selectedStudent.admission_number,
+      subject,
+      exam_mark: Number(exam_mark),
+      ca: Number(ca),
+      term_id,
+      session_id,
+    }];
+    setSaving(true);
+    try {
+      await axios.post('http://localhost:5000/api/students/add-exam-score', {
+        schoolName,
+        className: selectedStudent.class_name,
+        examData,
+      });
+      showAlert('success', 'Exam score added successfully');
+      const res = await axios.get(`http://localhost:5000/api/students/exams?schoolName=${encodeURIComponent(schoolName)}&className=${encodeURIComponent(selectedStudent.class_name)}&admission_number=${encodeURIComponent(selectedStudent.admission_number)}`);
+      setExamResults(res.data.examResults || []);
+      setExamForm({ subject: '', exam_mark: '', ca: '', term_id: '', session_id: '' });
+    } catch (err) {
+      console.error('Error adding exam score:', err);
+      showAlert('error', 'Failed to add exam score');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleClose = () => {
+    setModalOpen(false);
+    setSelectedStudent(null);
+    setExamResults([]);
+  };
+
+  return (
+    <Box p={3}>
+      <Typography variant="h4" fontWeight="bold" color="#1976d2" sx={{ fontSize: '1.25rem', mb: 3 }}>
+        Add Exam to Students
+      </Typography>
+      {/* existing class tabs and tables untouched for brevity */}
+
+      <Modal open={modalOpen} onClose={handleClose} aria-labelledby="add-exam-modal">
+        <Box sx={style}>
+          <Box flex={1} pr={2} component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography variant="h6" mb={1}>Add Exam Score</Typography>
+            <FormControl fullWidth required>
+              <InputLabel id="subject-label">Subject</InputLabel>
+              <Select labelId="subject-label" name="subject" value={examForm.subject} onChange={handleInputChange} label="Subject">
+                {subjects.map((subj) => (
+                  <MenuItem key={subj.subject_id} value={subj.subject_name}>{subj.subject_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField label="Exam Mark" name="exam_mark" type="number" value={examForm.exam_mark} onChange={handleInputChange} required fullWidth inputProps={{ min: 0, max: 100 }} />
+            <TextField label="CA" name="ca" type="number" value={examForm.ca} onChange={handleInputChange} required fullWidth inputProps={{ min: 0, max: 100 }} />
+            <FormControl fullWidth required>
+              <InputLabel id="session-label">Session</InputLabel>
+              <Select labelId="session-label" name="session_id" value={examForm.session_id} onChange={handleInputChange} label="Session">
+                {sessions.map((session) => (
+                  <MenuItem key={session.id} value={session.id}>{session.session_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth required>
+              <InputLabel id="term-label">Term</InputLabel>
+              <Select labelId="term-label" name="term_id" value={examForm.term_id} onChange={handleInputChange} label="Term">
+                {terms.map((term) => (
+                  <MenuItem key={term.id} value={term.id}>{term.term_name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Box>
+              <Button type="submit" variant="contained" color="primary" disabled={saving}>
+                {saving ? 'Saving...' : 'Add Exam Score'}
+              </Button>
+              <Button onClick={handleClose} sx={{ ml: 2 }}>Cancel</Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Snackbar open={alert.open} autoHideDuration={4000} onClose={() => setAlert({ ...alert, open: false })} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert onClose={() => setAlert({ ...alert, open: false })} severity={alert.severity} sx={{ width: '100%' }}>{alert.message}</Alert>
+      </Snackbar>
+    </Box>
+  );
+};
+
+export default Reports;
+
+
+// PDF handler
+  const handleDownloadPDF = async (student) => {
+    setCurrentStudent(student);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const input = printRef.current;
+    const canvas = await html2canvas(input, { 
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    pdf.save(`${student.student_name}_${term}_Result.pdf`);
+  };
+
+  // Printable Result Component with Watermark Background
+  const PrintableResult = React.forwardRef(({ student, subjects, school, className, session, term }, ref) => (
+    <div ref={ref} style={{ 
+      padding: '10px', 
+      fontFamily: 'Arial',
+      position: 'relative',
+      minHeight: '100vh'
+    }}>
+      {/* Watermark Background Logo */}
+      {school.logo && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          opacity: 0.7,
+          zIndex: -1,
+          width: '60%',
+          textAlign: 'center',
+          borderRadius:'20px'
+        }}>
+          <img 
+            src={school.logo} 
+            alt="School Logo" 
+            style={{ 
+              width: '100%',
+              maxWidth: '400px',
+              objectFit: 'contain',
+              borderRadius:'20'
+     
+            }} 
+          />
+        </div>
+      )}
+
+      {/* School Header */}
+      <div style={{ 
+        textAlign: 'center', 
+        marginBottom: '10px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+       {school.logo && ( 
+  <img 
+    src={school.logo} 
+    alt="School Logo" 
+    style={{ 
+      maxWidth: '100px', 
+      maxHeight: '100px',
+      marginBottom: '2px',
+      objectFit: 'contain',
+     borderRadius:'20px'
+    }} 
+  />
+)}
+
+        <h2 style={{ margin: '2px 0', textTransform: 'uppercase' }}>{school.name}</h2>
+        <h3 style={{ margin: '2px 0' }}>{term} Examination Result - {session}</h3>
+      </div>
+
+      {/* Student Info */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        marginBottom: '0px', 
+        padding: '5px', 
+        border: '1px solid #ddd',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div>
+          <p><strong>Name:</strong> {student.student_name}</p>
+          <p><strong>Admission No:</strong> {student.admission_number}</p>
+        </div>
+        <div>
+          <p><strong>Class:</strong> {className}</p>
+          <p><strong>Position:</strong> {getOrdinalSuffix(student.position)}</p>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-around', 
+        background: '#f5f5f5', 
+        padding: '3px', 
+        marginBottom: '0px',
+        borderRadius: '5px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <p><strong>Total Marks:</strong> {student.total}</p>
+        <p><strong>Average:</strong> {student.average.toFixed(2)}</p>
+        <p><strong>Overall Grade:</strong> 
+          <span style={{ 
+            fontWeight: 'bold',
+            marginLeft: '5px'
+          }}>
+            {student.overallGrade}
+          </span>
+        </p>
+      </div>
+
+      {/* Results Table */}
+      <table border="1" cellPadding="8" style={{ 
+        width: '100%', 
+        borderCollapse: 'collapse', 
+        marginBottom: '10px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <th style={{ padding: '5px', textAlign: 'left' }}>Subject</th>
+            <th style={{ padding: '5px', textAlign: 'center' }}>Score</th>
+            <th style={{ padding: '5px', textAlign: 'center' }}>Grade</th>
+            <th style={{ padding: '5px', textAlign: 'center' }}>Remark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {subjects.map((subject, i) => (
+            <tr key={i}>
+              <td style={{ padding: '4px', border: '1px solid #ddd' }}>{subject}</td>
+              <td style={{ padding: '4px', border: '1px solid #ddd', textAlign: 'center' }}>
+                {student.scores[subject] || '-'}
+              </td>
+              <td style={{ 
+                padding: '8px', 
+                border: '1px solid #ddd', 
+                textAlign: 'center',
+                fontWeight: 'bold'
+              }}>
+                {student.grades[subject] || '-'}
+              </td>
+              <td style={{ padding: '4px', border: '1px solid #ddd', textAlign: 'center' }}>
+                {student.remarks[subject] || '-'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Signatures */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        marginTop: '20px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div style={{ textAlign: 'center', width: '45%' }}>
+          <p style={{ fontWeight: 'bold', marginBottom: '30px' }}>Class Teacher's Remark:</p>
+          <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
+            _________________________________
+          </p>
+          <p style={{ marginTop: '5px' }}>Signature & Date</p>
+        </div>
+        <div style={{ textAlign: 'center', width: '45%' }}>
+          <p style={{ fontWeight: 'bold', marginBottom: '30px' }}>Principal's Remark:</p>
+          <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
+            _________________________________
+          </p>
+          <p style={{ marginTop: '5px' }}>Signature & Date</p>
+        </div>
+      </div>
+    </div>
+  ));
+
+
+
+
+  // PDF handler
+  const handleDownloadPDF = async (student) => {
+    setCurrentStudent(student);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    const input = printRef.current;
+    const canvas = await html2canvas(input, { 
+      scale: 2,
+      useCORS: true,
+      allowTaint: true
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    pdf.save(`${student.student_name}_${term}_Result.pdf`);
+  };
+
+  // Printable Result Component
+  const PrintableResult = React.forwardRef(({ student, subjects, school, className, session, term }, ref) => (
+    <div ref={ref} style={{ padding: '20px', fontFamily: 'Arial' }}>
+      {/* School Header */}
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        {school.logo && (
+          <img 
+            src={school.logo} 
+            alt="School Logo" 
+            style={{ 
+              maxWidth: '100px', 
+              maxHeight: '100px',
+              marginBottom: '10px',
+              objectFit: 'contain'
+            }} 
+          />
+        )}
+        <h2 style={{ margin: '5px 0', textTransform: 'uppercase' }}>{school.name}</h2>
+        <h3 style={{ margin: '5px 0' }}>{term} Examination Result - {session}</h3>
+      </div>
+
+      {/* Student Info */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', padding: '10px', border: '1px solid #ddd' }}>
+        <div>
+          <p><strong>Name:</strong> {student.student_name}</p>
+          <p><strong>Admission No:</strong> {student.admission_number}</p>
+        </div>
+        <div>
+          <p><strong>Class:</strong> {className}</p>
+          <p><strong>Position:</strong> {getOrdinalSuffix(student.position)}</p>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-around', 
+        background: '#f5f5f5', 
+        padding: '10px', 
+        marginBottom: '20px',
+        borderRadius: '5px'
+      }}>
+        <p><strong>Total Marks:</strong> {student.total}</p>
+        <p><strong>Average:</strong> {student.average.toFixed(2)}</p>
+        <p><strong>Overall Grade:</strong> 
+          <span style={{ 
+            color: student.overallGrade === 'A' ? 'green' :
+                  student.overallGrade === 'B' ? 'blue' :
+                  student.overallGrade === 'C' ? 'orange' : 'red',
+            fontWeight: 'bold',
+            marginLeft: '5px'
+          }}>
+            {student.overallGrade}
+          </span>
+        </p>
+      </div>
+
+      {/* Results Table */}
+      <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <th style={{ padding: '10px', textAlign: 'left' }}>Subject</th>
+            <th style={{ padding: '10px', textAlign: 'center' }}>Score</th>
+            <th style={{ padding: '10px', textAlign: 'center' }}>Grade</th>
+            <th style={{ padding: '10px', textAlign: 'center' }}>Remark</th>
+          </tr>
+        </thead>
+        <tbody>
+          {subjects.map((subject, i) => (
+            <tr key={i}>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{subject}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
+                {student.scores[subject] || '-'}
+              </td>
+              <td style={{ 
+                padding: '8px', 
+                border: '1px solid #ddd', 
+                textAlign: 'center',
+                color: student.grades[subject] === 'A' ? 'green' :
+                      student.grades[subject] === 'B' ? 'blue' :
+                      student.grades[subject] === 'C' ? 'orange' : 'red',
+                fontWeight: 'bold'
+              }}>
+                {student.grades[subject] || '-'}
+              </td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
+                {student.remarks[subject] || '-'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Signatures */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px' }}>
+        <div style={{ textAlign: 'center', width: '45%' }}>
+          <p style={{ fontWeight: 'bold', marginBottom: '30px' }}>Class Teacher's Remark:</p>
+          <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
+            _________________________________
+          </p>
+          <p style={{ marginTop: '5px' }}>Signature & Date</p>
+        </div>
+        <div style={{ textAlign: 'center', width: '45%' }}>
+          <p style={{ fontWeight: 'bold', marginBottom: '30px' }}>Principal's Remark:</p>
+          <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
+            _________________________________
+          </p>
+          <p style={{ marginTop: '5px' }}>Signature & Date</p>
+        </div>
+      </div>
+    </div>
+  ));
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+import Layout from './components/layout/Layout';
+import TeacherLayout from './components/layout/TeacherLayout';
+import StudentLayout from './components/layout/StudentLayout';
+import { CircularProgress, Box } from '@mui/material';
+
+// Public Pages
+import HomePage from './pages/HomePage';
+import SchoolRegistration from './pages/SchoolRegistration';
+import Login from './pages/Login';
+import StudentLogin from './pages/StudentLogin';
+import TeacherLogin from './components/teachers/TeacherLogin';
+import PageNotFound from './pages/PageNotFound';
+
+// Admin Pages
+import Dashboard from './pages/Dashboard';
+import Students from './pages/Students';
+import Teachers from './pages/Teachers';
+import Exams from './pages/Exams';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Classes from './pages/Classes';
+import GenReport from './pages/GenReport';
+import ManageExams from './pages/ManageExams';
+import ManageSubjects from './pages/ManageSubjects';
+import SuperAdminDashboard from './components/admin/SuperAdminDashboard';
+import Schools from './components/admin/Schools';
+import Admins from './components/admin/Admins';
+import AdminSettings from './components/admin/AdminSettings';
+
+// Student Pages
+import StudentDashboard from './pages/StudentDashboard';
+import StudentProfile from './components/students/StudentProfile';
+import Progress from './components/students/Progress';
+import Results from './components/students/Results';
+import StudentSettings from './components/students/StudentSettings';
+
+// Teacher Pages
+import TeacherDashboard from './components/teachers/TeacherDashboard';
+import TeachersProfile from './components/teachers/TeachersProfile';
+import TeachersClasses from './components/teachers/TeachersClass';
+import TeachersSchedule from './components/teachers/TeachersSchedule';
+import TeachersSettings from './components/teachers/TeachersSetting';
+import TeacherSubjects from './components/teachers/TeachersSubject';
+import TeacherExam from './components/teachers/TeacherExam';
+
+// Shared Components
+import ManageTeacher from './components/teachers/ManageTeacher';
+import ManageStudentsOptions from './components/students/ManageStudentOptions';
+import UpdateStudent from './components/students/UpdateStudent';
+import TransferStudent from './components/students/TransferStudent';
+import FreezeStudent from './components/students/FreezStudent';
+import WithdrawStudent from './components/students/WithdrawStudent';
+import AssignClass from './components/teachers/AssignClass';
+import AssignSubject from './components/teachers/AssignSubject';
+import UpdateTeacher from './components/teachers/UpdateTeacher';
+import DeleteTeacher from './components/teachers/DeleteTeacher';
+import Subject from './components/subjects/Subject';
+import AddSubject from './components/subjects/AddSubject';
+import UpdateSubject from './components/subjects/UpdateStubject';
+import DeleteSubject from './components/subjects/DeleteSubject';
+import FirstTerm from './components/exams/FirstTerm';
+import SecondTerm from './components/exams/SecondTerm';
+import ThirdTerm from './components/exams/ThirdTerm';
+import AddExams from './components/exams/AddExam';
+import ViewExams from './components/exams/ViewExam';
+import TransferStudentForm from './components/students/TransferStudentForm';
+import ViewFirstTerm from './components/exams/ViewFirstTerm';
+import ViewSecondTerm from './components/exams/ViewSecondTerm';
+import ViewThirdTerm from './components/exams/ViewThirdTerm';
+
+const ProtectedRoute = ({ user, role, redirectPath, layout: Layout }) => {
+  if (!user) return <Navigate to={redirectPath} replace />;
+  if (role && user.role !== role) return <Navigate to={redirectPath} replace />;
+  
+  return <Layout><Outlet /></Layout>;
+};
+
+function App() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/register" element={<SchoolRegistration />} />
+      <Route path="/admin-login" element={<Login />} />
+      <Route path="/student-login" element={<StudentLogin />} />
+      <Route path="/teacher-login" element={<TeacherLogin />} />
+
+      {/* Admin Protected Routes */}
+      <Route 
+        path="/admin" 
+        element={
+          <ProtectedRoute 
+            user={user} 
+            role="admin" 
+            redirectPath="/admin-login" 
+            layout={Layout} 
+          />
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="view-first" element={<ViewFirstTerm />} />
+        <Route path="view-second" element={<ViewSecondTerm />} />
+        <Route path="view-third" element={<ViewThirdTerm />} />
+        <Route path="classes" element={<Classes />} />
+        <Route path="students" element={<Students />} />
+        <Route path="teachers" element={<Teachers />} />
+        <Route path="manage-teacher" element={<ManageTeacher />} />
+        <Route path="manage-student" element={<ManageStudentsOptions />} />
+        <Route path="manage-exam" element={<ManageExams />} />
+        <Route path="manage-subject" element={<ManageSubjects />} />
+        <Route path="update-student" element={<UpdateStudent />} />
+        <Route path="transfer-student" element={<TransferStudent />} />
+        <Route path="transfer-student/:admissionNumber" element={<TransferStudentForm />} />
+        <Route path="withdraw-student" element={<WithdrawStudent />} />
+        <Route path="freeze-student" element={<FreezeStudent />} />
+        <Route path="assign-class" element={<AssignClass />} />
+        <Route path="assign-subject" element={<AssignSubject />} />
+        <Route path="update-teacher" element={<UpdateTeacher />} />
+        <Route path="delete-teacher" element={<DeleteTeacher />} />
+        <Route path="subject" element={<Subject />} />
+        <Route path="add-subject" element={<AddSubject />} />
+        <Route path="update-subject" element={<UpdateSubject />} />
+        <Route path="delete-subject" element={<DeleteSubject />} />
+        <Route path="first-term" element={<FirstTerm />} />
+        <Route path="second-term" element={<SecondTerm />} />
+        <Route path="third-term" element={<ThirdTerm />} />
+        <Route path="Add-exam" element={<AddExams />} />
+        <Route path="view-exam" element={<ViewExams />} />
+        <Route path="exams" element={<Exams />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="generate" element={<GenReport />} />
+      </Route>
+
+      {/* Teacher Protected Routes */}
+      <Route 
+        path="/teacher" 
+        element={
+          <ProtectedRoute 
+            user={user} 
+            role="teacher" 
+            redirectPath="/teacher-login" 
+            layout={TeacherLayout} 
+          />
+        }
+      >
+        <Route index element={<TeacherDashboard />} />
+        <Route path="profile" element={<TeachersProfile />} />
+        <Route path="classes" element={<TeachersClasses />} />
+        <Route path="schedule" element={<TeachersSchedule />} />
+        <Route path="subject" element={<TeacherSubjects />} />
+        <Route path="settings" element={<TeachersSettings />} />
+        <Route path="exams" element={<TeacherExam />} />
+      </Route>
+
+      {/* Student Protected Routes */}
+      <Route 
+        path="/student" 
+        element={
+          <ProtectedRoute 
+            user={user} 
+            role="student" 
+            redirectPath="/student-login" 
+            layout={StudentLayout} 
+          />
+        }
+      >
+        <Route index element={<StudentDashboard />} />
+        <Route path="profile" element={<StudentProfile />} />
+        <Route path="results" element={<Results />} />
+        <Route path="progress" element={<Progress />} />
+        <Route path="settings" element={<StudentSettings />} />
+      </Route>
+
+      {/* Super Admin Route */}
+      <Route 
+        path="/superadmin" 
+        element={
+          user?.role === 'superadmin' ? 
+            <SuperAdminDashboard /> : 
+            <Navigate to="/admin-login" replace />
+        } 
+      />
+      <Route path="/admin-schools" element={<Schools />} />
+      <Route path="/schooladmins" element={<Admins />} />
+      <Route path="/admin-settings" element={<AdminSettings />} />
+
+      {/* Catch-all Route */}
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
+  );
+}
+
+export default App;

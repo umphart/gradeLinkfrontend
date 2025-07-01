@@ -1,10 +1,25 @@
-import { Box, Grid, Paper, Typography, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
-import { People, School, Assessment, Assignment } from '@mui/icons-material';
+import { 
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow
+} from '@mui/material';
+import {
+  People,
+  School,
+  Assessment,
+  Assignment
+} from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudents } from '../services/studentService';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Pie } from 'react-chartjs-2';
 import ManageStudentsOptions from '../components/students/ManageStudentOptions';
 
 import {
@@ -13,7 +28,8 @@ import {
   CategoryScale,
   LinearScale,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 } from 'chart.js';
 
 ChartJS.register(
@@ -21,7 +37,8 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
 const Dashboard = () => {
@@ -81,55 +98,37 @@ const Dashboard = () => {
     fetchTotalStudents();
   }, [user, navigate]);
 
-const featureCards = [
-  { label: 'Manage Students', icon: <People fontSize="large" />, onClick: () => navigate('/admin/manage-student') },
-  { label: 'Manage Teachers', icon: <School fontSize="large" />, onClick: () => navigate('/admin/manage-teacher') },
-  { label: 'Manage Exams', icon: <Assessment fontSize="large" />, onClick: () => navigate('/admin/manage-exam') },
-  { label: 'Manage Subjects', icon: <Assignment fontSize="large" />, onClick: () => navigate('/admin/manage-subject') },
-];
+  const featureCards = [
+    { label: 'Manage Students', icon: <People fontSize="large" sx={{ color: '#2196f3' }} />, onClick: () => navigate('/admin/manage-student') },
+    { label: 'Manage Teachers', icon: <School fontSize="large" />, onClick: () => navigate('/admin/manage-teacher') },
+    { label: 'Manage Exams', icon: <Assessment fontSize="large" />, onClick: () => navigate('/admin/manage-exam') },
+    { label: 'Manage Subjects', icon: <Assignment fontSize="large" />, onClick: () => navigate('/admin/manage-subject') },
+  ];
 
 
-  const barData = {
-    labels: ['Primary', 'Junior', 'Senior'],
+
+
+
+  const pieData = {
+    labels: ['Male', 'Female'],
     datasets: [
       {
-        label: 'Male Students',
-        data: [
-          categoryStats.primaryMale,
-          categoryStats.juniorMale,
-          categoryStats.seniorMale,
-        ],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-      },
-      {
-        label: 'Female Students',
-        data: [
-          categoryStats.primaryFemale,
-          categoryStats.juniorFemale,
-          categoryStats.seniorFemale,
-        ],
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        data: [genderStats.male, genderStats.female],
+        backgroundColor: ['#42a5f5', '#ef5350'],
+        hoverOffset: 6,
       },
     ],
   };
 
-  const barOptions = {
+  const pieOptions = {
     responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: {
-      x: {
-        title: { display: true, text: 'Section' },
-      },
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: 'Number of Students' },
-        ticks: { stepSize: 5 },
-      },
+    plugins: {
+      legend: { position: 'bottom' },
     },
   };
 
   return (
-    <Box sx={{ backgroundColor: '#f9fafb', minHeight: '100vh', padding: 4 }}>
+    <Box sx={{ backgroundColor: '#f9fafb', minHeight: '100vh', padding: 0 , borderRadius: 4}}>
       {showManageStudents ? (
         <ManageStudentsOptions goBack={() => setShowManageStudents(false)} />
       ) : (
@@ -137,74 +136,165 @@ const featureCards = [
           <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#3347B0', textAlign: 'center' }}>
             Admin Dashboard
           </Typography>
-          <Typography variant="subtitle1" align="center" sx={{ marginBottom: 4, color: '#555' }}>
-            Welcome, {user?.firstName || 'Admin'}! Manage and monitor your system.
+          <Typography variant="subtitle1" align="center" sx={{ marginBottom: 2, color: '#555' }}>
+            Welcome, {user?.firstName + " " + user?.lastName}! Manage and monitor your system.
           </Typography>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center', marginBottom: 5 }}>
-            {featureCards.map((item, index) => (
-              <Paper
-                key={index}
-                elevation={3}
-                onClick={item.onClick}
-                sx={{
-                  width: { xs: '45%', sm: 180 },
-                  height: 140,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderRadius: 2,
-                  backgroundColor: '#f4f7fa',
-                  cursor: 'pointer',
-                  transition: '0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                  },
-                }}
-              >
-                <Box sx={{ color: '#3347B0', mb: 1 }}>{item.icon}</Box>
-                <Typography variant="body1" sx={{ fontWeight: 500, color: '#555', textAlign: 'center' }}>
-                  {item.label}
-                </Typography>
-              </Paper>
-            ))}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center', marginBottom: 2 }}>
+            {featureCards.map((item, index) => {
+              const colors = ['#E3F2FD', '#FFF3E0', '#F1F8E9', '#FCE4EC'];
+              const bgColor = colors[index % colors.length];
+              return (
+                <Paper
+                  key={index}
+                  elevation={3}
+                  onClick={item.onClick}
+                  sx={{
+                    width: { xs: '45%', sm: 180 },
+                    height: 140,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 2,
+                    backgroundColor: bgColor,
+                    cursor: 'pointer',
+                    transition: '0.3s',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    },
+                  }}
+                >
+                  <Box sx={{ color: '#3347B0', mb: 1 }}>{item.icon}</Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500, color: '#555', textAlign: 'center' }}>
+                    {item.label}
+                  </Typography>
+                </Paper>
+              );
+            })}
           </Box>
 
-          <Grid container spacing={4}>
-           <Grid item xs={12} md={6}>
-  <Paper elevation={3} sx={{ p: 2 }}>
-    <Typography variant="subtitle1" gutterBottom align="center" sx={{ fontWeight: 600 }}>
-      Student Statistics
-    </Typography>
-    <Table size="small">
-      <TableHead>
-        <TableRow>
-          <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>Category</TableCell>
-          <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>Count</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <TableRow><TableCell>Total Students</TableCell><TableCell>{totalStudents}</TableCell></TableRow>
-        <TableRow><TableCell>Males</TableCell><TableCell>{genderStats.male}</TableCell></TableRow>
-        <TableRow><TableCell>Females</TableCell><TableCell>{genderStats.female}</TableCell></TableRow>
-        <TableRow><TableCell>Primary</TableCell><TableCell>{categoryStats.primary}</TableCell></TableRow>
-        <TableRow><TableCell>Junior</TableCell><TableCell>{categoryStats.junior}</TableCell></TableRow>
-        <TableRow><TableCell>Senior</TableCell><TableCell>{categoryStats.senior}</TableCell></TableRow>
-      </TableBody>
-    </Table>
+        <Box
+  sx={{
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    mt: 4,
+    px: 2, // Optional padding on smaller screens
+  }}
+>
+  <Grid
+    container
+    spacing={4}
+    sx={{ width: '100%', maxWidth: '1400px' }} // Max width keeps layout from stretching too far
+    justifyContent="center"
+  >
+ 
+{/* Bar Chart */}
+<Grid item xs={12} md={5}>
+  <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '200px',
+      }}
+    >
+      <Box sx={{ width: '200px', maxWidth: 600, height: '100%' }}>
+        <Bar
+          data={{
+            labels: ['Male', 'Female'],
+            datasets: [
+              {
+                label: 'Students',
+                data: [genderStats.male, genderStats.female],
+                backgroundColor: ['#42a5f5', '#ef5350'],
+                borderColor: ['#1e88e5', '#d32f2f'],
+                borderWidth: 1,
+              },
+            ],
+          }}
+          options={{
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                },
+              },
+            },
+            maintainAspectRatio: false, // Add this to allow custom height
+          }}
+        />
+      </Box>
+    </Box>
   </Paper>
 </Grid>
 
 
-            <Grid item xs={12} md={6}>
-              <Paper elevation={3} sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom align="center">Gender Distribution by Category</Typography>
-                <Bar data={barData} options={barOptions} />
-              </Paper>
-            </Grid>
-          </Grid>
+    {/* Student Stats Table */}
+    <Grid item xs={12} md={4}>
+      <Paper elevation={3} sx={{ p: 2 }}>
+        <Typography
+          variant="subtitle1"
+          gutterBottom
+          align="center"
+          sx={{ fontWeight: 600 }}
+        >
+          Student Statistics
+        </Typography>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                Category
+              </TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                Count
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell>Total Students</TableCell>
+              <TableCell>{totalStudents}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Males</TableCell>
+              <TableCell>{genderStats.male}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Females</TableCell>
+              <TableCell>{genderStats.female}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Paper>
+    </Grid>
+
+    {/* Pie Chart */}
+    <Grid item xs={12} md={4}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+  
+       
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ width: 180, height: 200 }}>
+            <Pie data={pieData} options={pieOptions} />
+          </Box>
+        </Box>
+      </Paper>
+    </Grid>
+  </Grid>
+</Box>
+
         </>
       )}
     </Box>

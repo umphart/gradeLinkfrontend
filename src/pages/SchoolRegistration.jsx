@@ -134,13 +134,30 @@ const SchoolRegistration = () => {
 };
 
 
- if (loading) {
+if (loading) {
   return (
-    <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 10 }}>
-      <Typography variant="h5" gutterBottom><h1>Submitting your registration....</h1></Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Box>
+    <Container maxWidth="sm" sx={{ mt: 10, display: 'flex', justifyContent: 'center' }}>
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          textAlign: 'center',
+          borderRadius: 4,
+          backgroundColor: '#f5f5f5',
+        }}
+      >
+        <Typography variant="h5" color="primary" gutterBottom>
+          Submitting Your Registration...
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Please wait while we process your information.
+        </Typography>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress size={40} thickness={4} />
+        </Box>
+      </Paper>
     </Container>
   );
 }

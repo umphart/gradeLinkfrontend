@@ -2,27 +2,29 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarWeek, FaClipboardCheck, FaDatabase, FaHSquare, FaRegListAlt } from 'react-icons/fa';
 import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
+
 
 const ViewExams = () => {
   const navigate = useNavigate();
 
   const cards = [
-    { label: 'First Term', icon: <FaRegListAlt size={32} />, path: '/admin/first-term' },
-    { label: 'Second Term', icon: <FaCalendarWeek size={32} />, path: '/admin/second-term' },
-    { label: 'Third Term', icon: <FaDatabase size={32} />, path: '/admin/third-term' },
+    { label: 'First Term', icon: <FaRegListAlt size={32} />, path: '/admin/view-first' },
+    { label: 'Second Term', icon: <FaCalendarWeek size={32} />, path: '/admin/view-second' },
+    { label: 'Third Term', icon: <FaDatabase size={32} />, path: '/admin/view-third' },
   ];
 
   return (
     <Box sx={{ p: 4, maxWidth: 1000, mx: 'auto', backgroundColor: '#f9fafb', borderRadius: 3 }}>
-      <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', top: 16, left: 16, color: '#3347B0' }}>
-        ⬅️
-      </IconButton>
-
+      
+         <IconButton onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+  <ArrowBack />
+</IconButton>
       <Typography variant="h4" align="center" sx={{ fontWeight: 'bold', color: '#3347B0', mb: 1 }}>
-        Manage Exams
+        View Exams
       </Typography>
       <Typography variant="subtitle1" align="center" sx={{ mb: 4, color: '#666' }}>
-        Handle exam records for all terms.
+        Handle exam records for all terms
       </Typography>
 
       <Grid container spacing={3} justifyContent="center">
