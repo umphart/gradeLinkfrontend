@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import {
   Box,
   Typography,
@@ -12,81 +12,52 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button,
-  Modal,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Snackbar,
-  Alert
+  Alert,
+  Button
 } from '@mui/material';
+import { ArrowBack, FileDownload } from '@mui/icons-material';
 import axios from 'axios';
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxHeight: '80vh',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  display: 'flex',
-  p: 2,
-  borderRadius: 2,
-  overflowY: 'auto',
-};
+import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const AllStudents = () => {
   const [studentsByClass, setStudentsByClass] = useState({});
   const [loading, setLoading] = useState(true);
-  const [subjects, setSubjects] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [examResults, setExamResults] = useState([]);
-  const [examForm, setExamForm] = useState({
-    subject: '',
-    exam_mark: '',
-    ca: ''
-  });
-  const [saving, setSaving] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [classNames, setClassNames] = useState([]);
-
-  // Snackbar Alert
+  const [school, setSchool] = useState({ name: '', logo: '' });
   const [alert, setAlert] = useState({
     open: false,
     severity: 'success',
     message: ''
   });
+  const navigate = useNavigate();
 
   const showAlert = (severity, message) => {
     setAlert({ open: true, severity, message });
   };
 
-  const schoolName = (() => {
-    try {
-      const schoolData = localStorage.getItem('school');
-      if (schoolData) return JSON.parse(schoolData).name || '';
-      const userData = localStorage.getItem('user');
-      if (userData) return JSON.parse(userData).schoolName || '';
-    } catch {
-      return '';
-    }
-    return '';
-  })();
+  useEffect(() => {
+    const schoolData = JSON.parse(localStorage.getItem('school')) || {};
+    setSchool({
+      name: schoolData.name || 'GradeLink365  🎓',
+      logo: schoolData.logo ? `http://localhost:5000/uploads/logos/${schoolData.logo}` : ''
+    });
+  }, []);
 
   useEffect(() => {
-    if (!schoolName) {
+    if (!school.name) {
       setLoading(false);
       return;
     }
 
     const fetchStudents = async () => {
+      setLoading(true); // Set loading to true when starting to fetch
       try {
-        const res = await axios.get(`http://localhost:5000/api/students/students?schoolName=${encodeURIComponent(schoolName)}`);
+        const res = await axios.get(`http://localhost:5000/api/students/students?schoolName=${encodeURIComponent(school.name)}`);
         const data = res.data.students;
 
         const grouped = {};
@@ -107,81 +78,156 @@ const AllStudents = () => {
         console.error('Error fetching students:', err);
         showAlert('error', 'Failed to fetch students');
       } finally {
-        setLoading(false);
+        setLoading(false); // Set loading to false when done
       }
     };
 
     fetchStudents();
-  }, [schoolName]);
-
-  const handleAddExam = async (student) => {
-    setSelectedStudent(student);
-    setExamForm({ subject: '', exam_mark: '', ca: '' });
-    setExamResults([]);
-    setModalOpen(true);
-
-    try {
-      const subjectRes = await axios.get(`http://localhost:5000/api/subjects/all?schoolName=${encodeURIComponent(schoolName)}`);
-      setSubjects(subjectRes.data.subjects || []);
-
-      const examRes = await axios.get(`http://localhost:5000/api/students/exams?schoolName=${encodeURIComponent(schoolName)}&className=${encodeURIComponent(student.class_name)}&admission_number=${encodeURIComponent(student.admission_number)}`);
-      setExamResults(examRes.data.examResults || []);
-    } catch (err) {
-      console.error('Error fetching exam data:', err);
-      showAlert('error', 'Failed to fetch exam/subject data');
-    }
-  };
-
-  const handleClose = () => {
-    setModalOpen(false);
-    setSelectedStudent(null);
-    setExamResults([]);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setExamForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!examForm.subject || !examForm.exam_mark || !examForm.ca) {
-      showAlert('warning', 'Please fill all fields');
-      return;
-    }
-
-    const examData = [{
-      student_name: selectedStudent.full_name,
-      admission_number: selectedStudent.admission_number,
-      subject: examForm.subject,
-      exam_mark: Number(examForm.exam_mark),
-      ca: Number(examForm.ca),
-    }];
-
-    setSaving(true);
-    try {
-      await axios.post('http://localhost:5000/api/students/add-exam-score', {
-        schoolName,
-        className: selectedStudent.class_name,
-        examData,
-      });
-
-      showAlert('success', 'Exam score added successfully');
-
-      const res = await axios.get(`http://localhost:5000/api/students/exams?schoolName=${encodeURIComponent(schoolName)}&className=${encodeURIComponent(selectedStudent.class_name)}&admission_number=${encodeURIComponent(selectedStudent.admission_number)}`);
-      setExamResults(res.data.examResults || []);
-      setExamForm({ subject: '', exam_mark: '', ca: '' });
-    } catch (err) {
-      console.error('Error adding exam score:', err);
-      showAlert('error', 'Failed to add exam score');
-    } finally {
-      setSaving(false);
-    }
-  };
+  }, [school.name]);
 
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
+  };
+
+  // Export to Excel
+  const handleExportExcel = () => {
+    const currentClassName = classNames[currentTab];
+    const students = studentsByClass[currentClassName] || [];
+    
+    const exportData = students.map((student, index) => ({
+      'S/N': index + 1,
+      'Full Name': student.full_name,
+      'Admission Number': student.admission_number,
+      'Class': student.class_name,
+      'Section': student.section,
+      'Gender': student.gender,
+      'Age': student.age || 'N/A'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Students');
+    XLSX.writeFile(wb, `${school.name.replace(/\s+/g, '_')}_${currentClassName.replace(/\s+/g, '_')}_students.xlsx`);
+  };
+
+  const handleExportPDF = async () => {
+    const currentClassName = classNames[currentTab];
+    const students = studentsByClass[currentClassName] || [];
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // Set Times New Roman font
+    doc.addFont('Times-Roman', 'Times', 'normal');
+    doc.setFont('Times');
+
+    // Add watermark (background logo with low opacity)
+    if (school.logo) {
+      try {
+        const img = new Image();
+        img.src = school.logo;
+        await new Promise((resolve) => {
+          img.onload = resolve;
+        });
+
+        doc.saveGraphicsState();
+        doc.setGState(new doc.GState({ opacity: 0.1 }));
+
+        const imgWidth = pageWidth * 0.8;
+        const imgHeight = (img.height * imgWidth) / img.width;
+        const xPos = (pageWidth - imgWidth) / 2;
+        const yPos = (pageHeight - imgHeight) / 2;
+
+        doc.addImage(img, 'JPEG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
+        doc.restoreGraphicsState();
+      } catch (error) {
+        console.error('Error loading logo for watermark:', error);
+      }
+    }
+
+    // Function to add header with logo, title, and subtitle
+    const addHeader = () => {
+      doc.setFontSize(16);
+      doc.setFont('Times', 'bold');
+      const title = `${school.name} - Students`;
+      const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      doc.text(title, (pageWidth - titleWidth) / 2, 20);
+
+      doc.setFontSize(12);
+      doc.setFont('Times', 'normal');
+      const subtitle = `Class: ${currentClassName}`;
+      const subtitleWidth = doc.getStringUnitWidth(subtitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      doc.text(subtitle, (pageWidth - subtitleWidth) / 2, 28);
+
+      // Add top-right logo
+      if (school.logo) {
+        try {
+          const img = new Image();
+          img.src = school.logo;
+          doc.addImage(img, 'JPEG', pageWidth - 25, 10, 15, 15, undefined, 'FAST');
+        } catch (error) {
+          console.error('Error loading logo for header:', error);
+        }
+      }
+    };
+
+    // Prepare student table
+    const headers = [
+      'S/N',
+      'Full Name',
+      'Admission No',
+      'Class',
+      'Section',
+      'Gender',
+      'Age'
+    ];
+
+    const body = students.map((student, index) => [
+      index + 1,
+      student.full_name,
+      student.admission_number,
+      student.class_name,
+      student.section,
+      student.gender,
+      student.age || 'N/A'
+    ]);
+
+    // Generate table and attach headers to each page
+    autoTable(doc, {
+      startY: 35,
+      head: [headers],
+      body: body,
+      styles: {
+        fontSize: 8,
+        font: 'Times',
+        cellPadding: 2,
+        overflow: 'linebreak'
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+        font: 'Times'
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 'auto' }
+      },
+      margin: { top: 40 },
+      didDrawPage: function (data) {
+        addHeader();
+
+        // Footer with date and page number
+        doc.setFontSize(10);
+        doc.text('Generated on: ' + new Date().toLocaleDateString(), 20, pageHeight - 10);
+        doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, pageWidth - 20, pageHeight - 10, { align: 'right' });
+      }
+    });
+
+    // Save PDF with school name and class in filename
+    doc.save(`${school.name.replace(/\s+/g, '_')}_${currentClassName.replace(/\s+/g, '_')}_students.pdf`);
   };
 
   if (loading) {
@@ -193,7 +239,7 @@ const AllStudents = () => {
     );
   }
 
-  if (!schoolName) {
+  if (!school.name) {
     return (
       <Box textAlign="center" mt={4}>
         <Typography variant="h6" color="error">No school name found in localStorage.</Typography>
@@ -201,27 +247,67 @@ const AllStudents = () => {
     );
   }
 
+  return (
+    <Box p={3}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" fontWeight="bold" color="#1976d2" sx={{ fontSize: '1.25rem' }}>
+          Students
+        </Typography>
+        <Box>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleExportExcel}
+            startIcon={<FileDownload />}
+            sx={{ mr: 2 }}
+            disabled={loading || classNames.length === 0}
+          >
+            Excel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleExportPDF}
+            startIcon={<FileDownload />}
+            disabled={loading || classNames.length === 0}
+          >
+            PDF
+          </Button>
+        </Box>
+      </Box>
 
- return (
-  <Box p={3}>
-    <Typography  
-      variant="h4"
-      fontWeight="bold"
-      color="#1976d2"
-      sx={{ fontSize: '1.25rem', mb: 3 }}
-    >
-      Students
-    </Typography>
+      {loading ? (
+        <Box textAlign="center" mt={4}>
+          <CircularProgress />
+          <Typography variant="h6" mt={2}>Loading students...</Typography>
+        </Box>
+      ) : classNames.length > 0 ? (
+        <>
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{ mb: 3 }}
+          >
+            {classNames
+              .slice()
+              .sort((a, b) => {
+                const aStartsWithP = a.toLowerCase().startsWith('p');
+                const bStartsWithP = b.toLowerCase().startsWith('p');
+                if (aStartsWithP && !bStartsWithP) return -1;
+                if (!aStartsWithP && bStartsWithP) return 1;
+                return a.localeCompare(b);
+              })
+              .map((className, idx) => (
+                <Tab
+                  key={className}
+                  label={className.replace(/_/g, ' ').toUpperCase()}
+                  sx={{ textTransform: 'none' }}
+                />
+              ))}
+          </Tabs>
 
-    {classNames.length > 0 ? (
-      <>
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ mb: 3 }}
-        >
           {classNames
             .slice()
             .sort((a, b) => {
@@ -232,167 +318,46 @@ const AllStudents = () => {
               return a.localeCompare(b);
             })
             .map((className, idx) => (
-              <Tab
-                key={className}
-                label={className.replace(/_/g, ' ').toUpperCase()}
-                sx={{ textTransform: 'none' }}
-                id={`class-tab-${idx}`}
-                aria-controls={`class-tabpanel-${idx}`}
-              />
-            ))}
-        </Tabs>
-
-        {classNames
-          .slice()
-          .sort((a, b) => {
-            const aStartsWithP = a.toLowerCase().startsWith('p');
-            const bStartsWithP = b.toLowerCase().startsWith('p');
-            if (aStartsWithP && !bStartsWithP) return -1;
-            if (!aStartsWithP && bStartsWithP) return 1;
-            return a.localeCompare(b);
-          })
-          .map((className, idx) => (
-            <div
-              role="tabpanel"
-              hidden={currentTab !== idx}
-              id={`class-tabpanel-${idx}`}
-              aria-labelledby={`class-tab-${idx}`}
-              key={className}
-            >
-              {currentTab === idx && (
-                <TableContainer component={Paper} sx={{ mb: 4 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell><strong>SN</strong></TableCell>
-                        <TableCell><strong>Full Name</strong></TableCell>
-                        <TableCell><strong>Admission Number</strong></TableCell>
-                        <TableCell><strong>Class</strong></TableCell>
-                        <TableCell><strong>Section</strong></TableCell>
-                        <TableCell><strong>Gender</strong></TableCell>
-                        <TableCell><strong>Age</strong></TableCell>
-                      
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {studentsByClass[className]?.map((student, index) => (
-                        <TableRow key={student.admission_number}>
-                          <TableCell>{index + 1}</TableCell>
-                          <TableCell>{student.full_name}</TableCell>
-                          <TableCell>{student.admission_number}</TableCell>
-                          <TableCell>{student.class_name}</TableCell>
-                          <TableCell>{student.section}</TableCell>
-                          <TableCell>{student.gender}</TableCell>
-                          <TableCell>{student.age || 'N/A'}</TableCell>
-                          
+              <div key={className} hidden={currentTab !== idx}>
+                {currentTab === idx && (
+                  <TableContainer component={Paper} sx={{ mb: 4 }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell><strong>SN</strong></TableCell>
+                          <TableCell><strong>Full Name</strong></TableCell>
+                          <TableCell><strong>Admission Number</strong></TableCell>
+                          <TableCell><strong>Class</strong></TableCell>
+                          <TableCell><strong>Section</strong></TableCell>
+                          <TableCell><strong>Gender</strong></TableCell>
+                          <TableCell><strong>Age</strong></TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </div>
-          ))}
-      </>
-    ) : (
-      <Typography variant="h6" textAlign="center" mt={4}>
-        No students found.
-      </Typography>
-    )}
+                      </TableHead>
+                      <TableBody>
+                        {studentsByClass[className]?.map((student, index) => (
+                          <TableRow key={student.admission_number}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{student.full_name}</TableCell>
+                            <TableCell>{student.admission_number}</TableCell>
+                            <TableCell>{student.class_name}</TableCell>
+                            <TableCell>{student.section}</TableCell>
+                            <TableCell>{student.gender}</TableCell>
+                            <TableCell>{student.age || 'N/A'}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </div>
+            ))}
+        </>
+      ) : (
+        <Typography variant="h6" textAlign="center" mt={4}>
+          No students found.
+        </Typography>
+      )}
 
-      {/* Modal for Add Exam */}
-      <Modal open={modalOpen} onClose={handleClose} aria-labelledby="add-exam-modal">
-        <Box sx={{ ...style, display: 'flex', gap: 3 }}>
-          {/* LEFT: Add exam form */}
-          <Box flex={1} pr={2} component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="h6" mb={1}>
-              Add Exam Score
-            </Typography>
-
-            <FormControl fullWidth required>
-              <InputLabel id="subject-label">Subject</InputLabel>
-              <Select
-                labelId="subject-label"
-                name="subject"
-                value={examForm.subject}
-                onChange={handleInputChange}
-                label="Subject"
-              >
-                {subjects.map((subj) => (
-                  <MenuItem key={subj.subject_id} value={subj.subject_name}>
-                    {subj.subject_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <TextField
-              label="Exam Mark"
-              name="exam_mark"
-              type="number"
-              value={examForm.exam_mark}
-              onChange={handleInputChange}
-              required
-              fullWidth
-              inputProps={{ min: 0, max: 100 }}
-            />
-            <TextField
-              label="CA"
-              name="ca"
-              type="number"
-              value={examForm.ca}
-              onChange={handleInputChange}
-              required
-              fullWidth
-              inputProps={{ min: 0, max: 100 }}
-            />
-            <Box>
-              <Button type="submit" variant="contained" color="primary" disabled={saving}>
-                {saving ? 'Saving...' : 'Add Exam Score'}
-              </Button>
-              <Button onClick={handleClose} sx={{ ml: 2 }}>
-                Cancel
-              </Button>
-            </Box>
-          </Box>
-
-          {/* RIGHT: Existing exam results */}
-          <Box flex={1} overflow="auto" maxHeight="70vh" pl={2} borderLeft="1px solid #ccc">
-            <Typography variant="h6" mb={2}>
-              Exam Results for {selectedStudent?.full_name || ''}
-            </Typography>
-
-            {examResults.length === 0 ? (
-              <Typography>No exam results found.</Typography>
-            ) : (
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell><strong>Subject</strong></TableCell>
-                    <TableCell><strong>Exam</strong></TableCell>
-                    <TableCell><strong>CA</strong></TableCell>
-                    <TableCell><strong>Total</strong></TableCell>
-                    <TableCell><strong>Remark</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {examResults.map((exam, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{exam.subject}</TableCell>
-                      <TableCell>{exam.exam_mark}</TableCell>
-                      <TableCell>{exam.ca}</TableCell>
-                      <TableCell>{exam.total}</TableCell>
-                      <TableCell>{exam.remark}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* Snackbar Alert */}
       <Snackbar
         open={alert.open}
         autoHideDuration={4000}

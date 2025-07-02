@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, FormControl, InputLabel, Select,
-  MenuItem, Snackbar, Alert, TextField, IconButton, Button
+  MenuItem, Snackbar, Alert, TextField, IconButton, Button, CircularProgress
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import axios from 'axios';
@@ -56,6 +56,7 @@ const GenReport = () => {
   const [alert, setAlert] = useState({ open: false, severity: 'info', message: '' });
   const [school, setSchool] = useState({ name: '', logo: '' });
   const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(false); // Added loading state
 
   useEffect(() => {
     const schoolData = JSON.parse(localStorage.getItem('school')) || {};
@@ -69,6 +70,7 @@ const GenReport = () => {
     const fetchRecords = async () => {
       if (!school.name || !selectedClass || !selectedSession || !selectedTerm) return;
 
+      setLoading(true); // Start loading
       try {
         const res = await axios.get(`http://localhost:5000/api/students/get-exam-records`, {
           params: {
@@ -94,6 +96,8 @@ const GenReport = () => {
       } catch (err) {
         console.error('Error fetching exam scores:', err);
         setAlert({ open: true, severity: 'error', message: 'Failed to fetch exam scores' });
+      } finally {
+        setLoading(false); // Stop loading regardless of success/failure
       }
     };
 
@@ -185,142 +189,141 @@ const GenReport = () => {
     XLSX.writeFile(wb, `results_${selectedClass}_${selectedTerm}.xlsx`);
   };
 
- // Export to PDF with all requested features
-const handleExportPDF = async () => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  const handleExportPDF = async () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Set Times New Roman font
-  doc.addFont('Times-Roman', 'Times', 'normal');
-  doc.setFont('Times');
+    // Set Times New Roman font
+    doc.addFont('Times-Roman', 'Times', 'normal');
+    doc.setFont('Times');
 
-  // Add watermark background with adjusted opacity
-  if (school.logo) {
-    try {
-      const img = new Image();
-      img.src = school.logo;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-      
-      doc.saveGraphicsState();
-      doc.setGState(new doc.GState({opacity: 0.1}));
-      
-      const imgWidth = pageWidth * 0.8;
-      const imgHeight = (img.height * imgWidth) / img.width;
-      const xPos = (pageWidth - imgWidth) / 2;
-      const yPos = (pageHeight - imgHeight) / 2;
-      
-      doc.addImage(img, 'JPEG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
-      doc.restoreGraphicsState();
-    } catch (error) {
-      console.error('Error loading logo for watermark:', error);
-    }
-  }
-
-  // Function to add header to each page
-  const addHeader = () => {
-    // Add title (centered and bold)
-    doc.setFontSize(16);
-    doc.setFont('Times', 'bold');
-    const title = `${school.name} - Results`;
-    const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-    doc.text(title, (pageWidth - titleWidth) / 2, 20);
-
-    // Add subtitle (centered)
-    doc.setFontSize(12);
-    doc.setFont('Times', 'normal');
-    const subtitle = `Class: ${selectedClass} - ${selectedTerm} ${selectedSession}`;
-    const subtitleWidth = doc.getStringUnitWidth(subtitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
-    doc.text(subtitle, (pageWidth - subtitleWidth) / 2, 28);
-
-    // Add small logo
+    // Add watermark background with adjusted opacity
     if (school.logo) {
       try {
         const img = new Image();
         img.src = school.logo;
-        doc.addImage(img, 'JPEG', pageWidth - 25, 10, 15, 15, undefined, 'FAST');
+        await new Promise((resolve) => {
+          img.onload = resolve;
+        });
+        
+        doc.saveGraphicsState();
+        doc.setGState(new doc.GState({opacity: 0.1}));
+        
+        const imgWidth = pageWidth * 0.8;
+        const imgHeight = (img.height * imgWidth) / img.width;
+        const xPos = (pageWidth - imgWidth) / 2;
+        const yPos = (pageHeight - imgHeight) / 2;
+        
+        doc.addImage(img, 'JPEG', xPos, yPos, imgWidth, imgHeight, undefined, 'FAST');
+        doc.restoreGraphicsState();
       } catch (error) {
-        console.error('Error loading logo for header:', error);
+        console.error('Error loading logo for watermark:', error);
       }
     }
-  };
 
-  // Function to add footer to each page
-  const addFooter = () => {
-    const pageCount = doc.internal.getNumberOfPages();
-    
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
+    // Function to add header to each page
+    const addHeader = () => {
+      // Add title (centered and bold)
+      doc.setFontSize(16);
+      doc.setFont('Times', 'bold');
+      const title = `${school.name} - Results`;
+      const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      doc.text(title, (pageWidth - titleWidth) / 2, 20);
+
+      // Add subtitle (centered)
+      doc.setFontSize(12);
+      doc.setFont('Times', 'normal');
+      const subtitle = `Class: ${selectedClass} - ${selectedTerm} ${selectedSession}`;
+      const subtitleWidth = doc.getStringUnitWidth(subtitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+      doc.text(subtitle, (pageWidth - subtitleWidth) / 2, 28);
+
+      // Add small logo
+      if (school.logo) {
+        try {
+          const img = new Image();
+          img.src = school.logo;
+          doc.addImage(img, 'JPEG', pageWidth - 25, 10, 15, 15, undefined, 'FAST');
+        } catch (error) {
+          console.error('Error loading logo for header:', error);
+        }
+      }
+    };
+
+    // Function to add footer to each page
+    const addFooter = () => {
+      const pageCount = doc.internal.getNumberOfPages();
       
-      // Signature line
-      doc.setFontSize(10);
-      doc.text('Exam Officer: ___________________________', 20, pageHeight - 30);
-      doc.text('Date: ___________', pageWidth - 50, pageHeight - 30);
-      
-      // Page number
-      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-    }
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        
+        // Signature line
+        doc.setFontSize(10);
+        doc.text('Exam Officer: ___________________________', 20, pageHeight - 30);
+        doc.text('Date: ___________', pageWidth - 50, pageHeight - 30);
+        
+        // Page number
+        doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+      }
+    };
+
+    // Prepare table data
+    const headers = [
+      'S/N',
+      'Admission No',
+      'Student Name',
+      ...subjects,
+      'Total',
+      'Average',
+      'Grade',
+      'Position'
+    ];
+
+    const body = filteredStudents.map((student, index) => [
+      index + 1,
+      student.admission_number,
+      student.student_name,
+      ...subjects.map(subject => student.grades[subject] || '-'),
+      student.total,
+      student.average.toFixed(2),
+      student.overallGrade,
+      getOrdinalSuffix(student.position)
+    ]);
+
+    // Add table with page breaks
+    autoTable(doc, {
+      startY: 35,
+      head: [headers],
+      body: body,
+      styles: { 
+        fontSize: 8,
+        cellPadding: 2,
+        font: 'Times',
+        overflow: 'linebreak'
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+        font: 'Times'
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 'auto' }
+      },
+      margin: { top: 40 },
+      didDrawPage: function(data) {
+        // Add header to each page
+        addHeader();
+      }
+    });
+
+    // Add footer to all pages
+    addFooter();
+
+    doc.save(`results_${selectedClass}_${selectedTerm}.pdf`);
   };
-
-  // Prepare table data
-  const headers = [
-    'S/N',
-    'Admission No',
-    'Student Name',
-    ...subjects,
-    'Total',
-    'Average',
-    'Grade',
-    'Position'
-  ];
-
-  const body = filteredStudents.map((student, index) => [
-    index + 1,
-    student.admission_number,
-    student.student_name,
-    ...subjects.map(subject => student.grades[subject] || '-'),
-    student.total,
-    student.average.toFixed(2),
-    student.overallGrade,
-    getOrdinalSuffix(student.position)
-  ]);
-
-  // Add table with page breaks
-  autoTable(doc, {
-    startY: 35,
-    head: [headers],
-    body: body,
-    styles: { 
-      fontSize: 8,
-      cellPadding: 2,
-      font: 'Times',
-      overflow: 'linebreak'
-    },
-    headStyles: {
-      fillColor: [41, 128, 185],
-      textColor: 255,
-      fontStyle: 'bold',
-      font: 'Times'
-    },
-    columnStyles: {
-      0: { cellWidth: 'auto' },
-      1: { cellWidth: 'auto' },
-      2: { cellWidth: 'auto' }
-    },
-    margin: { top: 40 },
-    didDrawPage: function(data) {
-      // Add header to each page
-      addHeader();
-    }
-  });
-
-  // Add footer to all pages
-  addFooter();
-
-  doc.save(`results_${selectedClass}_${selectedTerm}.pdf`);
-};
 
   return (
     <Box sx={{ p: 2 }}>
@@ -362,6 +365,8 @@ const handleExportPDF = async () => {
           color="success"
           onClick={handleExportExcel}
           startIcon={<FileDownloadIcon />}
+          disabled={loading || filteredStudents.length === 0}
+        sx={{height: '50px'}}
         >
           Excel
         </Button>
@@ -371,47 +376,56 @@ const handleExportPDF = async () => {
           color="error"
           onClick={handleExportPDF}
           startIcon={<FileDownloadIcon />}
+          disabled={loading || filteredStudents.length === 0}
+          sx={{height: '50px'}}
         >
           PDF
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
-  <Table>
-    <TableHead>
-      <TableRow>
-        <TableCell>S/N</TableCell> {/* Added Serial Number column */}
-        <TableCell>Name</TableCell>
-        <TableCell>Admission No</TableCell>
-        {subjects.map(subject => (
-          <TableCell key={subject} align="center">{subject}</TableCell>
-        ))}
-        <TableCell>Total</TableCell>
-        <TableCell>Average</TableCell>
-        <TableCell>Grade</TableCell>
-        <TableCell>Position</TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {filteredStudents.map((student, index) => (
-        <TableRow key={student.admission_number}>
-          <TableCell>{index + 1}</TableCell> {/* Serial Number */}
-          <TableCell>{student.student_name}</TableCell>
-          <TableCell>{student.admission_number}</TableCell>
-          {subjects.map(subject => (
-            <TableCell key={subject} align="center">
-              {student.grades[subject] || '-'}
-            </TableCell>
-          ))}
-          <TableCell>{student.total}</TableCell>
-          <TableCell>{student.average.toFixed(2)}</TableCell>
-          <TableCell>{student.overallGrade}</TableCell>
-          <TableCell>{getOrdinalSuffix(student.position)}</TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</TableContainer>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+          <Typography variant="body1" sx={{ ml: 2 }}>Loading exam records...</Typography>
+        </Box>
+      ) : (
+        <TableContainer component={Paper} sx={{ mt: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>S/N</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Admission No</TableCell>
+                {subjects.map(subject => (
+                  <TableCell key={subject} align="center">{subject}</TableCell>
+                ))}
+                <TableCell>Total</TableCell>
+                <TableCell>Average</TableCell>
+                <TableCell>Grade</TableCell>
+                <TableCell>Position</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredStudents.map((student, index) => (
+                <TableRow key={student.admission_number}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{student.student_name}</TableCell>
+                  <TableCell>{student.admission_number}</TableCell>
+                  {subjects.map(subject => (
+                    <TableCell key={subject} align="center">
+                      {student.grades[subject] || '-'}
+                    </TableCell>
+                  ))}
+                  <TableCell>{student.total}</TableCell>
+                  <TableCell>{student.average.toFixed(2)}</TableCell>
+                  <TableCell>{student.overallGrade}</TableCell>
+                  <TableCell>{getOrdinalSuffix(student.position)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <Snackbar
         open={alert.open}
