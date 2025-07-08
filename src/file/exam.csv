@@ -1,0 +1,156 @@
+student_name,admission_number,subject,exam_mark,ca
+Abubakar Ibrahim,MBC/PR/2025/011,Mathematics,75,25
+Abubakar Ibrahim,MBC/PR/2025/011,English,68,22
+Abubakar Ibrahim,MBC/PR/2025/011,Hausa,40,25
+Abubakar Ibrahim,MBC/PR/2025/011,Basic Science,82,28
+Abubakar Ibrahim,MBC/PR/2025/011,IRK,88,30
+Umar Faruk,MBC/PR/2025/012,Mathematics,82,30
+Umar Faruk,MBC/PR/2025/012,English,74,22
+Umar Faruk,MBC/PR/2025/012,Hausa,82,30
+Umar Faruk,MBC/PR/2025/012,Basic Science,85,28
+Umar Faruk,MBC/PR/2025/012,IRK,92,30
+Maryam Sani,MBC/PR/2025/013,Mathematics,68,20
+Maryam Sani,MBC/PR/2025/013,English,72,23
+Maryam Sani,MBC/PR/2025/013,Hausa,58,20
+Maryam Sani,MBC/PR/2025/013,Basic Science,79,25
+Maryam Sani,MBC/PR/2025/013,IRK,85,28
+Chinedu Okeke,MBC/PR/2025/014,Mathematics,90,28
+Chinedu Okeke,MBC/PR/2025/014,English,65,18
+Chinedu Okeke,MBC/PR/2025/014,Hausa,60,28
+Chinedu Okeke,MBC/PR/2025/014,Basic Science,94,30
+Chinedu Okeke,MBC/PR/2025/014,CRK,89,30
+Amina Mohammed,MBC/PR/2025/015,Mathematics,73,22
+Amina Mohammed,MBC/PR/2025/015,English,70,20
+Amina Mohammed,MBC/PR/2025/015,Hausa,71,22
+Amina Mohammed,MBC/PR/2025/015,Basic Science,83,27
+Amina Mohammed,MBC/PR/2025/015,IRK,87,29
+Emmanuel Johnson,MBC/PR/2025/016,Mathematics,85,27
+Emmanuel Johnson,MBC/PR/2025/016,English,92,30
+Emmanuel Johnson,MBC/PR/2025/016,Hausa,85,27
+Emmanuel Johnson,MBC/PR/2025/016,Basic Science,88,29
+Emmanuel Johnson,MBC/PR/2025/016,CRK,95,30
+Fatima Abubakar,MBC/PR/2025/017,Mathematics,78,25
+Fatima Abubakar,MBC/PR/2025/017,English,65,18
+Fatima Abubakar,MBC/PR/2025/017,Hausa,43,25
+Fatima Abubakar,MBC/PR/2025/017,Basic Science,76,24
+Fatima Abubakar,MBC/PR/2025/017,IRK,80,26
+David Ojo,MBC/PR/2025/018,Mathematics,65,18
+David Ojo,MBC/PR/2025/018,English,78,25
+David Ojo,MBC/PR/2025/018,Hausa,65,18
+David Ojo,MBC/PR/2025/018,Basic Science,69,19
+David Ojo,MBC/PR/2025/018,CRK,71,21
+Halima Yusuf,MBC/PR/2025/019,Mathematics,92,30
+Halima Yusuf,MBC/PR/2025/019,English,85,28
+Halima Yusuf,MBC/PR/2025/019,Hausa,49,30
+Halima Yusuf,MBC/PR/2025/019,Basic Science,91,29
+Halima Yusuf,MBC/PR/2025/019,IRK,89,30
+James Adekunle,MBC/PR/2025/020,Mathematics,70,20
+James Adekunle,MBC/PR/2025/020,English,63,16
+James Adekunle,MBC/PR/2025/020,Hausa,63,16
+James Adekunle,MBC/PR/2025/020,Basic Science,72,23
+James Adekunle,MBC/PR/2025/020,CRK,74,22
+Aisha Bello,MBC/PR/2025/021,Mathematics,88,29
+Aisha Bello,MBC/PR/2025/021,English,76,24
+Aisha Bello,MBC/PR/2025/021,Basic Science,88,29
+Aisha Bello,MBC/PR/2025/021,Social Studies,85,28
+Aisha Bello,MBC/PR/2025/021,IRK,84,27
+Daniel Okonkwo,MBC/PR/2025/022,Mathematics,76,24
+Daniel Okonkwo,MBC/PR/2025/022,English,81,26
+Daniel Okonkwo,MBC/PR/2025/022,Basic Science,76,24
+Daniel Okonkwo,MBC/PR/2025/022,Social Studies,79,25
+Daniel Okonkwo,MBC/PR/2025/022,CRK,77,24
+Zainab Ibrahim,MBC/PR/2025/023,Mathematics,81,26
+Zainab Ibrahim,MBC/PR/2025/023,English,69,19
+Zainab Ibrahim,MBC/PR/2025/023,Basic Science,81,26
+Zainab Ibrahim,MBC/PR/2025/023,Social Studies,63,17
+Zainab Ibrahim,MBC/PR/2025/023,IRK,80,26
+Peter Olu,MBC/PR/2025/024,Mathematics,69,19
+Peter Olu,MBC/PR/2025/024,English,94,30
+Peter Olu,MBC/PR/2025/024,Basic Science,69,19
+Peter Olu,MBC/PR/2025/024,Social Studies,91,29
+Peter Olu,MBC/PR/2025/024,CRK,74,22
+Aminu Suleiman,MBC/PR/2025/025,Mathematics,94,30
+Aminu Suleiman,MBC/PR/2025/025,English,73,22
+Aminu Suleiman,MBC/PR/2025/025,Basic Science,94,30
+Aminu Suleiman,MBC/PR/2025/025,Social Studies,72,23
+Aminu Suleiman,MBC/PR/2025/025,IRK,89,30
+Grace Okafor,MBC/PR/2025/026,Mathematics,72,23
+Grace Okafor,MBC/PR/2025/026,English,70,20
+Grace Okafor,MBC/PR/2025/026,Social Studies,72,23
+Grace Okafor,MBC/PR/2025/026,Creative Arts,76,24
+Grace Okafor,MBC/PR/2025/026,CRK,87,29
+Musa Abdullahi,MBC/PR/2025/027,Mathematics,85,28
+Musa Abdullahi,MBC/PR/2025/027,English,78,25
+Musa Abdullahi,MBC/PR/2025/027,Social Studies,85,28
+Musa Abdullahi,MBC/PR/2025/027,Creative Arts,81,27
+Musa Abdullahi,MBC/PR/2025/027,IRK,84,27
+Sarah Joshua,MBC/PR/2025/028,Mathematics,79,25
+Sarah Joshua,MBC/PR/2025/028,English,65,18
+Sarah Joshua,MBC/PR/2025/028,Social Studies,79,25
+Sarah Joshua,MBC/PR/2025/028,Creative Arts,73,23
+Sarah Joshua,MBC/PR/2025/028,CRK,83,27
+Ibrahim Musa,MBC/PR/2025/029,Mathematics,63,17
+Ibrahim Musa,MBC/PR/2025/029,English,92,30
+Ibrahim Musa,MBC/PR/2025/029,Social Studies,63,17
+Ibrahim Musa,MBC/PR/2025/029,Creative Arts,69,21
+Ibrahim Musa,MBC/PR/2025/029,IRK,78,25
+Esther Daniel,MBC/PR/2025/030,Mathematics,91,29
+Esther Daniel,MBC/PR/2025/030,English,85,28
+Esther Daniel,MBC/PR/2025/030,Social Studies,91,29
+Esther Daniel,MBC/PR/2025/030,Creative Arts,87,29
+Esther Daniel,MBC/PR/2025/030,CRK,95,30
+Kabiru Ahmed,MBC/PR/2025/031,Mathematics,84,27
+Kabiru Ahmed,MBC/PR/2025/031,English,76,24
+Kabiru Ahmed,MBC/PR/2025/031,CRK,84,27
+Kabiru Ahmed,MBC/PR/2025/031,IRK,89,30
+Kabiru Ahmed,MBC/PR/2025/031,Computer Studies,80,26
+Ruth Samuel,MBC/PR/2025/032,Mathematics,77,24
+Ruth Samuel,MBC/PR/2025/032,English,81,26
+Ruth Samuel,MBC/PR/2025/032,CRK,77,24
+Ruth Samuel,MBC/PR/2025/032,Computer Studies,73,21
+Ruth Samuel,MBC/PR/2025/032,Phonics,70,20
+Yusuf Tanko,MBC/PR/2025/033,Mathematics,89,30
+Yusuf Tanko,MBC/PR/2025/033,English,69,19
+Yusuf Tanko,MBC/PR/2025/033,IRK,89,30
+Yusuf Tanko,MBC/PR/2025/033,Computer Studies,82,27
+Yusuf Tanko,MBC/PR/2025/033,Phonics,75,22
+Deborah Matthew,MBC/PR/2025/034,Mathematics,71,21
+Deborah Matthew,MBC/PR/2025/034,English,94,30
+Deborah Matthew,MBC/PR/2025/034,CRK,71,21
+Deborah Matthew,MBC/PR/2025/034,Computer Studies,76,24
+Deborah Matthew,MBC/PR/2025/034,Phonics,68,20
+Hassan Bello,MBC/PR/2025/035,Mathematics,80,26
+Hassan Bello,MBC/PR/2025/035,English,73,22
+Hassan Bello,MBC/PR/2025/035,IRK,80,26
+Hassan Bello,MBC/PR/2025/035,Computer Studies,79,25
+Hassan Bello,MBC/PR/2025/035,Phonics,72,21
+Joyce Eze,MBC/PR/2025/036,Mathematics,95,30
+Joyce Eze,MBC/PR/2025/036,English,70,20
+Joyce Eze,MBC/PR/2025/036,CRK,95,30
+Joyce Eze,MBC/PR/2025/036,Computer Studies,88,29
+Joyce Eze,MBC/PR/2025/036,Phonics,82,27
+Abdulrahman Nuhu,MBC/PR/2025/037,Mathematics,66,18
+Abdulrahman Nuhu,MBC/PR/2025/037,English,78,25
+Abdulrahman Nuhu,MBC/PR/2025/037,IRK,66,18
+Abdulrahman Nuhu,MBC/PR/2025/037,Computer Studies,71,21
+Abdulrahman Nuhu,MBC/PR/2025/037,Phonics,64,18
+Patience Okoro,MBC/PR/2025/038,Mathematics,83,27
+Patience Okoro,MBC/PR/2025/038,English,63,17
+Patience Okoro,MBC/PR/2025/038,CRK,83,27
+Patience Okoro,MBC/PR/2025/038,Computer Studies,77,25
+Patience Okoro,MBC/PR/2025/038,Phonics,79,25
+Suleiman Abba,MBC/PR/2025/039,Mathematics,74,22
+Suleiman Abba,MBC/PR/2025/039,English,91,29
+Suleiman Abba,MBC/PR/2025/039,IRK,74,22
+Suleiman Abba,MBC/PR/2025/039,Computer Studies,75,23
+Suleiman Abba,MBC/PR/2025/039,Phonics,71,21
+Blessing Okafor,MBC/PR/2025/040,Mathematics,87,29
+Blessing Okafor,MBC/PR/2025/040,English,72,23
+Blessing Okafor,MBC/PR/2025/040,CRK,87,29
+Blessing Okafor,MBC/PR/2025/040,Computer Studies,84,28
+Blessing Okafor,MBC/PR/2025/040,Phonics,80,26
+Adamu Haruna,MBC/PR/2025/041,Mathematics,78,25
+Adamu Haruna,MBC/PR/2025/041,English,79,25
+Adamu Haruna,MBC/PR/2025/041,IRK,78,25
+Adamu Haruna,MBC/PR/2025/041,Computer Studies,76,24
+Adamu Haruna,MBC/PR/2025/041,Phonics,74,23

@@ -26,8 +26,12 @@ export const getSchoolDetails = async (schoolId) => {
   return response.data;
 };
 
-export const updateSchool = async (schoolId, updateData) => {
-  const response = await api.patch(`/schools/${schoolId}`, updateData);
+export const updateSchool = async (schoolId, formData) => {
+  const response = await axios.patch(`/schools/${schoolId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
   return response.data;
 };
 

@@ -55,7 +55,7 @@ const AllStudents = () => {
     }
 
     const fetchStudents = async () => {
-      setLoading(true); // Set loading to true when starting to fetch
+      setLoading(true);
       try {
         const res = await axios.get(`http://localhost:5000/api/students/students?schoolName=${encodeURIComponent(school.name)}`);
         const data = res.data.students;
@@ -78,7 +78,7 @@ const AllStudents = () => {
         console.error('Error fetching students:', err);
         showAlert('error', 'Failed to fetch students');
       } finally {
-        setLoading(false); // Set loading to false when done
+        setLoading(false);
       }
     };
 
@@ -89,9 +89,16 @@ const AllStudents = () => {
     setCurrentTab(newValue);
   };
 
-  // Export to Excel
   const handleExportExcel = () => {
-    const currentClassName = classNames[currentTab];
+    const sortedClassNames = [...classNames].sort((a, b) => {
+      const aStartsWithP = a.toLowerCase().startsWith('p');
+      const bStartsWithP = b.toLowerCase().startsWith('p');
+      if (aStartsWithP && !bStartsWithP) return -1;
+      if (!aStartsWithP && bStartsWithP) return 1;
+      return a.localeCompare(b);
+    });
+    
+    const currentClassName = sortedClassNames[currentTab];
     const students = studentsByClass[currentClassName] || [];
     
     const exportData = students.map((student, index) => ({
@@ -111,18 +118,23 @@ const AllStudents = () => {
   };
 
   const handleExportPDF = async () => {
-    const currentClassName = classNames[currentTab];
+    const sortedClassNames = [...classNames].sort((a, b) => {
+      const aStartsWithP = a.toLowerCase().startsWith('p');
+      const bStartsWithP = b.toLowerCase().startsWith('p');
+      if (aStartsWithP && !bStartsWithP) return -1;
+      if (!aStartsWithP && bStartsWithP) return 1;
+      return a.localeCompare(b);
+    });
+    
+    const currentClassName = sortedClassNames[currentTab];
     const students = studentsByClass[currentClassName] || [];
-
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
 
-    // Set Times New Roman font
     doc.addFont('Times-Roman', 'Times', 'normal');
     doc.setFont('Times');
 
-    // Add watermark (background logo with low opacity)
     if (school.logo) {
       try {
         const img = new Image();
@@ -146,21 +158,19 @@ const AllStudents = () => {
       }
     }
 
-    // Function to add header with logo, title, and subtitle
     const addHeader = () => {
       doc.setFontSize(16);
       doc.setFont('Times', 'bold');
-      const title = `${school.name} - Students`;
+      const title = `${school.name}`;
       const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor;
       doc.text(title, (pageWidth - titleWidth) / 2, 20);
 
       doc.setFontSize(12);
       doc.setFont('Times', 'normal');
-      const subtitle = `Class: ${currentClassName}`;
+      const subtitle = `Class: ${currentClassName}- students`;
       const subtitleWidth = doc.getStringUnitWidth(subtitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
       doc.text(subtitle, (pageWidth - subtitleWidth) / 2, 28);
 
-      // Add top-right logo
       if (school.logo) {
         try {
           const img = new Image();
@@ -172,7 +182,6 @@ const AllStudents = () => {
       }
     };
 
-    // Prepare student table
     const headers = [
       'S/N',
       'Full Name',
@@ -193,7 +202,6 @@ const AllStudents = () => {
       student.age || 'N/A'
     ]);
 
-    // Generate table and attach headers to each page
     autoTable(doc, {
       startY: 35,
       head: [headers],
@@ -218,15 +226,12 @@ const AllStudents = () => {
       margin: { top: 40 },
       didDrawPage: function (data) {
         addHeader();
-
-        // Footer with date and page number
         doc.setFontSize(10);
         doc.text('Generated on: ' + new Date().toLocaleDateString(), 20, pageHeight - 10);
         doc.text(`Page ${doc.internal.getCurrentPageInfo().pageNumber}`, pageWidth - 20, pageHeight - 10, { align: 'right' });
       }
     });
 
-    // Save PDF with school name and class in filename
     doc.save(`${school.name.replace(/\s+/g, '_')}_${currentClassName.replace(/\s+/g, '_')}_students.pdf`);
   };
 
@@ -276,12 +281,7 @@ const AllStudents = () => {
         </Box>
       </Box>
 
-      {loading ? (
-        <Box textAlign="center" mt={4}>
-          <CircularProgress />
-          <Typography variant="h6" mt={2}>Loading students...</Typography>
-        </Box>
-      ) : classNames.length > 0 ? (
+      {classNames.length > 0 ? (
         <>
           <Tabs
             value={currentTab}

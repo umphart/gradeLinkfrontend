@@ -127,7 +127,9 @@ const handleAddTeacher = async () => {
 
     if (response.status === 201) {
       // Success case
-      setSnackbarMessage(`Teacher added! ID: ${response.data.teacher_id}`);
+     setSnackbarMessage(
+  `Teacher added successfully! ID: ${response.data.teacher_id}. Password: ${response.data.password} (please change after first login)`
+);
       setSnackbarSeverity('success');
       // Refresh data
       const data = await getTeachers();

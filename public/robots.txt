@@ -1,3 +1,56 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Disallow:
+
+{/* {type === 'subjects' && config.result.imported && (
+  <Box sx={{ mt: 2 }}>
+    <Typography variant="subtitle2" gutterBottom>
+      Imported Subjects:
+    </Typography>
+
+    <Paper sx={{ overflow: 'hidden', mb: 2 }}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr 1fr',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        fontWeight: 'bold',
+        p: 1,
+        bgcolor: 'action.hover'
+      }}>
+        <Typography>Subject Name</Typography>
+        <Typography>Subject Code</Typography>
+        <Typography>Class</Typography>
+        <Typography>Description</Typography>
+      </Box>
+
+      <Box sx={{ maxHeight: '300px', overflowY: 'auto' }}>
+        {config.result.imported.map((item, index) => (
+          <Box 
+            key={index}
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              p: 1,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              '&:nth-of-type(odd)': {
+                bgcolor: 'background.default'
+              }
+            }}
+          >
+            <Typography>{item.subject_name}</Typography>
+            <Typography>{item.subject_code}</Typography>
+            <Typography>{item.classname}</Typography>
+            <Typography>{item.description}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Paper>
+
+    <Typography variant="caption">
+      {config.result.imported.length} subjects imported
+    </Typography>
+  </Box>
+)} */}
+                

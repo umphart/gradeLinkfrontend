@@ -143,8 +143,11 @@ const Students = () => {
     setRegistering(true);
     try {
       const response = await addStudent(form);
-      setSnackbarMessage(`Student added successfully! Admission Number: ${response.data.admissionNumber}`);
-      setSnackbarSeverity('success');
+     setSnackbarMessage(
+  `Student added successfully! Admission Number: ${response.data.admissionNumber}. ` +
+  `Password: ${response.data.password} (please change after first login)`
+);
+  setSnackbarSeverity('success');
       setOpenSnackbar(true);
       handleModalClose();
       const data = await getStudents();

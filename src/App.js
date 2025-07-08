@@ -69,6 +69,7 @@ import TeacherViewSecond from './components/teachers/TeacherViewSecond';
 import TeacherViewThird from './components/teachers/TeacherViewThird';
 import TeacherViewFirst from './components/teachers/TeacherViewFirst';
 import AdminStudents from './components/admin/AdminStudents';
+import AdminTeachers from './components/admin/AdminTeachers';
 
 function App() {
   const { user, loading } = useAuth();
@@ -103,6 +104,8 @@ function App() {
     <Route path="/student-results" element={<Results />} />
     <Route path="/student-progress" element={<Progress />} />
     <Route path="/student-settings" element={<StudentSettings />} />
+      <Route path="/admin-teachers" element={<AdminTeachers />} />
+      
     
     <Route path="/teacher-profile" element= {<TeachersProfile/>}/>
       <Route path="/teacher-classes" element={<TeachersClasses />} />

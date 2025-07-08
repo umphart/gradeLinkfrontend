@@ -1,0 +1,150 @@
+full_name,class_name,section,gender,age,guidance_name,guidance_contact,disability_status
+Umar Faruk,Primary 1,Primary,Male,6,Jane Doe,08012345678,None
+Maryam Sani,Primary 1,Primary,Female,6,John Smith,08023456789,None
+Chinedu Okeke,Primary 1,Primary,Male,5,Mrs Okeke,08034567890,None
+Amina Mohammed,Primary 1,Primary,Female,6,Alhaji Mohammed,08045678901,None
+Emmanuel Johnson,Primary 1,Primary,Male,6,Mr Johnson,08056789012,None
+Fatima Abubakar,Primary 1,Primary,Female,5,Hajia Abubakar,08067890123,None
+David Ojo,Primary 1,Primary,Male,6,Pastor Ojo,08078901234,None
+Halima Yusuf,Primary 1,Primary,Female,6,Mr Yusuf,08089012345,None
+James Adekunle,Primary 1,Primary,Male,5,Mr Adekunle,08090123456,None
+Aisha Bello,Primary 1,Primary,Female,6,Alhaji Bello,08101234567,None
+Daniel Okonkwo,Primary 1,Primary,Male,6,Mr Okonkwo,08112345678,None
+Zainab Ibrahim,Primary 1,Primary,Female,5,Mrs Ibrahim,08123456789,None
+Peter Olu,Primary 1,Primary,Male,6,Mr Olu,08134567890,None
+Aminu Suleiman,Primary 1,Primary,Male,6,Alhaji Suleiman,08145678901,None
+Grace Okafor,Primary 1,Primary,Female,5,Mrs Okafor,08156789012,None
+Musa Abdullahi,Primary 1,Primary,Male,6,Mr Abdullahi,08167890123,None
+Sarah Joshua,Primary 1,Primary,Female,6,Pastor Joshua,08178901234,None
+Ibrahim Musa,Primary 1,Primary,Male,5,Mr Musa,08189012345,None
+Esther Daniel,Primary 1,Primary,Female,6,Mr Daniel,08190123456,None
+Kabiru Ahmed,Primary 1,Primary,Male,6,Alhaji Ahmed,08201234567,None
+Ruth Samuel,Primary 1,Primary,Female,5,Mr Samuel,08212345678,None
+Yusuf Tanko,Primary 1,Primary,Male,6,Mr Tanko,08223456789,None
+Deborah Matthew,Primary 1,Primary,Female,6,Mr Matthew,08234567890,None
+Hassan Bello,Primary 1,Primary,Male,5,Alhaji Bello,08245678901,None
+Joyce Eze,Primary 1,Primary,Female,6,Mrs Eze,08256789012,None
+Abdulrahman Nuhu,Primary 1,Primary,Male,6,Mr Nuhu,08267890123,None
+Patience Okoro,Primary 1,Primary,Female,6,Mrs Okoro,08278901234,None
+Suleiman Abba,Primary 1,Primary,Male,5,Alhaji Abba,08289012345,None
+Blessing Okafor,Primary 1,Primary,Female,6,Mr Okafor,08290123456,None
+Adamu Haruna,Primary 1,Primary,Male,6,Mr Haruna,08301234567,None
+Chioma Eze,Primary 2,Primary,Female,7,Mrs Eze,08312345678,None
+Yakubu Mohammed,Primary 2,Primary,Male,7,Alhaji Mohammed,08323456789,None
+Esther John,Primary 2,Primary,Female,7,Pastor John,08334567890,None
+Musa Bello,Primary 2,Primary,Male,6,Mr Bello,08345678901,None
+Amina Sani,Primary 2,Primary,Female,7,Hajia Sani,08356789012,None
+Samuel Okon,Primary 2,Primary,Male,7,Mr Okon,08367890123,None
+Fatima Ahmed,Primary 2,Primary,Female,6,Mrs Ahmed,08378901234,None
+Joseph Adeleke,Primary 2,Primary,Male,7,Mr Adeleke,08389012345,None
+Zainab Abubakar,Primary 2,Primary,Female,7,Alhaji Abubakar,08390123456,None
+Daniel James,Primary 2,Primary,Male,6,Mr James,08401234567,None
+Hauwa Yusuf,Primary 2,Primary,Female,7,Mr Yusuf,08412345678,None
+Peter Obi,Primary 2,Primary,Male,7,Mr Obi,08423456789,None
+Aisha Musa,Primary 2,Primary,Female,6,Mrs Musa,08434567890,None
+Emmanuel Okoro,Primary 2,Primary,Male,7,Mr Okoro,08445678901,None
+Khadija Ibrahim,Primary 2,Primary,Female,7,Alhaji Ibrahim,08456789012,None
+John Paul,Primary 2,Primary,Male,6,Pastor Paul,08467890123,None
+Halima Suleiman,Primary 2,Primary,Female,7,Mr Suleiman,08478901234,None
+Michael Brown,Primary 2,Primary,Male,7,Mr Brown,08489012345,None
+Amina Abdullahi,Primary 2,Primary,Female,6,Mrs Abdullahi,08490123456,None
+David Okeke,Primary 2,Primary,Male,7,Mr Okeke,08501234567,None
+Mary Johnson,Primary 2,Primary,Female,7,Mrs Johnson,08512345678,None
+Ibrahim Tanko,Primary 2,Primary,Male,6,Mr Tanko,08523456789,None
+Grace Williams,Primary 2,Primary,Female,7,Mrs Williams,08534567890,None
+Mohammed Kabir,Primary 2,Primary,Male,7,Alhaji Kabir,08545678901,None
+Ruth Daniel,Primary 2,Primary,Female,6,Mr Daniel,08556789012,None
+Yusuf Bala,Primary 2,Primary,Male,7,Mr Bala,08567890123,None
+Elizabeth Mark,Primary 2,Primary,Female,7,Mrs Mark,08578901234,None
+Sani Abubakar,Primary 2,Primary,Male,6,Alhaji Abubakar,08589012345,None
+Mercy Okon,Primary 2,Primary,Female,7,Mrs Okon,08590123456,None
+Ahmed Musa,Primary 2,Primary,Male,7,Mr Musa,08601234567,None
+Abdullahi Tanko,Primary 3,Primary,Male,8,Mr Tanko,08612345678,None
+Blessing Ojo,Primary 3,Primary,Female,8,Mrs Ojo,08623456789,None
+Musa Haruna,Primary 3,Primary,Male,7,Mr Haruna,08634567890,None
+Sarah Ibrahim,Primary 3,Primary,Female,8,Mrs Ibrahim,08645678901,None
+James Okoro,Primary 3,Primary,Male,8,Mr Okoro,08656789012,None
+Aisha Mohammed,Primary 3,Primary,Female,7,Hajia Mohammed,08667890123,None
+Daniel Adebayo,Primary 3,Primary,Male,8,Mr Adebayo,08678901234,None
+Fatima Sani,Primary 3,Primary,Female,8,Mrs Sani,08689012345,None
+Joseph Eze,Primary 3,Primary,Male,7,Pastor Eze,08690123456,None
+Hauwa Bello,Primary 3,Primary,Female,8,Mr Bello,08701234567,None
+Peter John,Primary 3,Primary,Male,8,Mr John,08712345678,None
+Amina Yusuf,Primary 3,Primary,Female,7,Mrs Yusuf,08723456789,None
+Emmanuel Musa,Primary 3,Primary,Male,8,Mr Musa,08734567890,None
+Khadija Abubakar,Primary 3,Primary,Female,8,Alhaji Abubakar,08745678901,None
+John Mark,Primary 3,Primary,Male,7,Mr Mark,08756789012,None
+Halima Adamu,Primary 3,Primary,Female,8,Mrs Adamu,08767890123,None
+Michael Okeke,Primary 3,Primary,Male,8,Mr Okeke,08778901234,None
+Aisha Abdullahi,Primary 3,Primary,Female,7,Mrs Abdullahi,08789012345,None
+David Okafor,Primary 3,Primary,Male,8,Mr Okafor,08790123456,None
+Mary Williams,Primary 3,Primary,Female,8,Mrs Williams,08801234567,None
+Ibrahim Suleiman,Primary 3,Primary,Male,7,Mr Suleiman,08812345678,None
+Grace Samuel,Primary 3,Primary,Female,8,Mrs Samuel,08823456789,None
+Mohammed Bala,Primary 3,Primary,Male,8,Alhaji Bala,08834567890,None
+Ruth Daniel,Primary 3,Primary,Female,7,Mr Daniel,08845678901,None
+Yusuf Kabir,Primary 3,Primary,Male,8,Mr Kabir,08856789012,None
+Elizabeth Matthew,Primary 3,Primary,Female,8,Mrs Matthew,08867890123,None
+Sani Nuhu,Primary 3,Primary,Male,7,Alhaji Nuhu,08878901234,None
+Mercy Okonkwo,Primary 3,Primary,Female,8,Mrs Okonkwo,08889012345,None
+Ahmed Musa,Primary 3,Primary,Male,8,Mr Musa,08890123456,None
+Oluwatobi Adebayo,Primary 4,Primary,Male,9,Mr Femi Adebayo,08031234574,None
+Folakemi Ogunlesi,Primary 4,Primary,Female,9,Mrs Yemisi Ogunlesi,08042345685,None
+Ibrahim Suleiman,Primary 4,Primary,Male,8,Alhaji Kabir Suleiman,08053456796,None
+Amina Mohammed,Primary 4,Primary,Female,9,Hajia Fatima Mohammed,08064567807,None
+Emeka Nwachukwu,Primary 4,Primary,Male,9,Mr Emeka Nwachukwu,08075678918,None
+Blessing Okafor,Primary 4,Primary,Female,8,Mrs Ngozi Okafor,08086789029,None
+Musa Bello,Primary 4,Primary,Male,9,Alhaji Yusuf Bello,08097890140,None
+Zainab Abubakar,Primary 4,Primary,Female,9,Hajia Aisha Abubakar,08108901251,None
+Chinedu Okeke,Primary 4,Primary,Male,8,Mr Emeka Okeke,08119012362,None
+Grace Williams,Primary 4,Primary,Female,9,Mrs Joy Williams,08120123473,None
+Yusuf Tanko,Primary 4,Primary,Male,9,Alhaji Sani Tanko,08131234584,None
+Maryam Ibrahim,Primary 4,Primary,Female,8,Hajia Halima Ibrahim,08142345695,None
+Daniel Johnson,Primary 4,Primary,Male,9,Mr Peter Johnson,08153456706,None
+Sarah Brown,Primary 4,Primary,Female,9,Mrs Patience Brown,08164567817,None
+Abdullahi Nuhu,Primary 4,Primary,Male,8,Alhaji Musa Nuhu,08175678928,None
+Aisha Haruna,Primary 4,Primary,Female,9,Hajia Zainab Haruna,08186789039,None
+Kabiru Adamu,Primary 4,Primary,Male,9,Alhaji Bello Adamu,08197890150,None
+Fatima Yusuf,Primary 4,Primary,Female,8,Hajia Amina Yusuf,08208901261,None
+Samuel Okoro,Primary 4,Primary,Male,9,Pastor John Okoro,08219012372,None
+Ruth Daniel,Primary 4,Primary,Female,9,Mrs Grace Daniel,08220123483,None
+Obinna Chukwu,Primary 4,Primary,Male,8,Mr Ifeanyi Chukwu,08231234594,None
+Adaeze Onyema,Primary 4,Primary,Female,9,Dr Uche Onyema,08242345605,None
+Suleiman Ahmed,Primary 4,Primary,Male,9,Alhaji Musa Ahmed,08253456716,None
+Khadija Bala,Primary 4,Primary,Female,8,Hajia Maryam Bala,08264567827,None
+Chukwudi Eze,Primary 4,Primary,Male,9,Mr Jude Eze,08275678938,None
+Ngozi Nwosu,Primary 4,Primary,Female,9,Mrs Amaka Nwosu,08286789049,None
+Musa Kabir,Primary 4,Primary,Male,8,Alhaji Haruna Kabir,08297890160,None
+Halima Sani,Primary 4,Primary,Female,9,Hajia Fatima Sani,08308901271,None
+Ifeanyi Okafor,Primary 4,Primary,Male,9,Mr Chinedu Okafor,08319012382,None
+Amarachi Ezeogu,Primary 4,Primary,Female,8,Dr Nkechi Ezeogu,08320123493,None
+Eze Chukwuma,Primary 5,Primary,Male,10,Chief Obi Chukwuma,08031234575,None
+Ngozi Okonkwo,Primary 5,Primary,Female,10,Mrs Uche Okonkwo,08042345686,None
+Musa Suleiman,Primary 5,Primary,Male,9,Alhaji Kabir Suleiman,08053456797,None
+Zainab Mohammed,Primary 5,Primary,Female,10,Hajia Aisha Mohammed,08064567808,None
+Chikaodinaka Nwafor,Primary 5,Primary,Male,10,Mr Emeka Nwafor,08075678919,None
+Amarachi Ezeogu,Primary 5,Primary,Female,9,Dr Nkechi Ezeogu,08086789030,None
+Abdullahi Bello,Primary 5,Primary,Male,10,Alhaji Sani Bello,08097890141,None
+Amina Abubakar,Primary 5,Primary,Female,10,Hajia Halima Abubakar,08108901252,None
+Obiora Onyekwere,Primary 5,Primary,Male,9,Mr Ifeanyi Onyekwere,08119012363,None
+Chidimma Okeke,Primary 5,Primary,Female,10,Mrs Amaka Okeke,08120123474,None
+Yusuf Tanko,Primary 5,Primary,Male,10,Alhaji Musa Tanko,08131234585,None
+Fatima Ibrahim,Primary 5,Primary,Female,9,Hajia Amina Ibrahim,08142345696,None
+Ifeanyichukwu Okafor,Primary 5,Primary,Male,10,Pastor Chinedu Okafor,08153456707,None
+Oluchi Nwankwo,Primary 5,Primary,Female,10,Mrs Chinwe Nwankwo,08164567818,None
+Suleiman Haruna,Primary 5,Primary,Male,9,Alhaji Bello Haruna,08175678929,None
+Khadija Nuhu,Primary 5,Primary,Female,10,Hajia Zainab Nuhu,08186789040,None
+Chibuike Okoro,Primary 5,Primary,Male,10,Mr Emeka Okoro,08197890151,None
+Mary Johnson,Primary 5,Primary,Female,9,Mrs Grace Johnson,08208901262,None
+Ibrahim Ahmed,Primary 5,Primary,Male,10,Alhaji Musa Ahmed,08219012373,None
+Ruth Williams,Primary 5,Primary,Female,10,Mrs Patience Williams,08220123484,None
+Emmanuel Chukwu,Primary 5,Primary,Male,9,Mr Jude Chukwu,08231234595,None
+Adaeze Onyema,Primary 5,Primary,Female,10,Dr Uche Onyema,08242345606,None
+Kabiru Sani,Primary 5,Primary,Male,10,Alhaji Haruna Sani,08253456717,None
+Halima Bala,Primary 5,Primary,Female,9,Hajia Maryam Bala,08264567828,None
+Daniel Ezeogu,Primary 5,Primary,Male,10,Mr Ifeanyi Ezeogu,08275678939,None
+Sarah Nwosu,Primary 5,Primary,Female,10,Mrs Amaka Nwosu,08286789050,None
+Musa Kabir,Primary 5,Primary,Male,9,Alhaji Yusuf Kabir,08297890161,None
+Aisha Yusuf,Primary 5,Primary,Female,10,Hajia Fatima Yusuf,08308901272,None
+Samuel Okafor,Primary 5,Primary,Male,10,Pastor John Okafor,08319012383,None
+Grace Okeke,Primary 5,Primary,Female,9,Mrs Ngozi Okeke,08320123494,None

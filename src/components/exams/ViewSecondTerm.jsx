@@ -385,30 +385,38 @@ const ViewSecondTerm = () => {
             ))}
           </tbody>
         </table>
-      </div>
+         {/* Signature Section */}
+<div style={{ 
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  marginTop: '30px',
+  padding: '0 20px',
+  fontSize: '14px'
+}}>
+  <div style={{ textAlign: 'center' }}>
+    <p><strong>________________________</strong></p>
+    <p>Principal</p>
+    <p>Date: __________</p>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <p><strong>________________________</strong></p>
+    <p>Class Teacher</p>
+    <p>Date: __________</p>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <p><strong>________________________</strong></p>
+    <p>Exam Officer</p>
+    <p>Date: __________</p>
+  </div>
+</div>
 
-      {/* Signatures */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        marginTop: '20px',
-        position: 'relative',
-        zIndex: 1
-      }}>
-        <div style={{ textAlign: 'center', width: '45%' }}>
-          <p style={{ fontWeight: 'bold', marginBottom: '20px' }}>Class Teacher's Sign & Date:</p>
-          <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
-            _________________________________
-          </p>
-        </div>
-        <div style={{ textAlign: 'center', width: '45%' }}>
-          <p style={{ fontWeight: 'bold', marginBottom: '20px' }}>Principal's Sign & Date:</p>
-          <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
-            _________________________________
-          </p>
-        </div>
-      </div>
     </div>
+
+
+  </div>
+     
+
+
   ));
 
   return (

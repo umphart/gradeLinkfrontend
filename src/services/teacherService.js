@@ -15,11 +15,11 @@ export const getTeachers = async () => {
 
 
 
-export const createTeacher = async (teacherData) => {
-  const response = await api.post('http://localhost:5000/api/students/add-student',
-     teacherData);
-  return response.data;
-};
+// export const createTeacher = async (teacherData) => {
+//   const response = await api.post('http://localhost:5000/api/students/add-student',
+//      teacherData);
+//   return response.data;
+// };
 
 export const updateTeacher = async (id, teacherData) => {
   const response = await api.patch(`/teachers/${id}`, teacherData);

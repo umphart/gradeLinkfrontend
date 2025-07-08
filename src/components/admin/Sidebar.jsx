@@ -16,7 +16,6 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import PersonIcon from '@mui/icons-material/Person';
 import { Link, useLocation } from 'react-router-dom';
-
 export const sidebarCollapsedWidth = 72;
 export const sidebarExpandedWidth = 240;
 
@@ -29,6 +28,7 @@ const Sidebar = ({ onCollapseStateChange }) => {
     { text: 'Schools', icon: <SchoolIcon />, path: '/admin-schools' },
     { text: 'Admins', icon: <AdminPanelSettingsIcon />, path: '/schooladmins' },
      { text: 'Students', icon: <PersonIcon />, path: '/admin-students' },
+     { text: 'Teachers', icon: <PersonIcon />, path: '/admin-teachers' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/admin-settings' },
   ];
 
@@ -80,7 +80,7 @@ const Sidebar = ({ onCollapseStateChange }) => {
                 }
               }}
             >
-              🎓 GradeLink365
+              <SchoolIcon/>
             </Typography>
           )}
         </Box>

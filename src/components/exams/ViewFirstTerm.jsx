@@ -333,7 +333,7 @@ const PrintableResult = React.forwardRef(({ student, subjects, school, className
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          opacity: 0.2,
+          opacity: 0.9,
           zIndex: -1,
           width: '80%',
           textAlign: 'center',
@@ -395,29 +395,34 @@ const PrintableResult = React.forwardRef(({ student, subjects, school, className
           ))}
         </tbody>
       </table>
+      {/* Signature Section */}
+<div style={{ 
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  marginTop: '30px',
+  padding: '0 20px',
+  fontSize: '14px'
+}}>
+  <div style={{ textAlign: 'center' }}>
+    <p><strong>________________________</strong></p>
+    <p>Principal</p>
+    <p>Date: __________</p>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <p><strong>________________________</strong></p>
+    <p>Class Teacher</p>
+    <p>Date: __________</p>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <p><strong>________________________</strong></p>
+    <p>Exam Officer</p>
+    <p>Date: __________</p>
+  </div>
+</div>
+
     </div>
 
-    {/* Signatures */}
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      marginTop: '20px',
-      position: 'relative',
-      zIndex: 1
-    }}>
-      <div style={{ textAlign: 'center', width: '45%' }}>
-        <p style={{ fontWeight: 'bold', marginBottom: '20px' }}>Class Teacher's Sign & Date:</p>
-        <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
-          _________________________________
-        </p>
-      </div>
-      <div style={{ textAlign: 'center', width: '45%' }}>
-        <p style={{ fontWeight: 'bold', marginBottom: '20px' }}>Principal's Sign & Date:</p>
-        <p style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '30px' }}>
-          _________________________________
-        </p>
-      </div>
-    </div>
+
   </div>
 ));
 

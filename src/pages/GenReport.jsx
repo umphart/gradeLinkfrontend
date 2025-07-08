@@ -163,25 +163,36 @@ const GenReport = () => {
   );
 
   // Export to Excel
-  const handleExportExcel = () => {
-    const exportData = filteredStudents.map(student => {
-      const studentData = {
-        'Admission Number': student.admission_number,
-        'Student Name': student.student_name,
-        'Class': student.class_name,
-        'Total': student.total,
-        'Average': student.average.toFixed(2),
-        'Overall Grade': student.overallGrade,
-        'Position': getOrdinalSuffix(student.position)
-      };
-      
-      // Add subject grades
-      subjects.forEach(subject => {
-        studentData[subject] = student.grades[subject] || '-';
-      });
-      
-      return studentData;
+const handleExportExcel = () => {
+  const exportData = filteredStudents.map(student => {
+    // Start with identity fields
+    const identityData = {
+      'Admission No': student.admission_number,
+      'Student Name': student.student_name // Make sure the key is correct
+    };
+
+    // Add subject grades
+    const subjectGrades = {};
+    subjects.forEach(subject => {
+      subjectGrades[subject] = student.grades[subject] || '-';
     });
+
+    // Append summary info
+    const summaryData = {
+      'Total': student.total,
+      'Average': student.average.toFixed(2),
+      'Grade': student.overallGrade,
+      'Position': getOrdinalSuffix(student.position),
+      'Overall Grade': student.overallGrade
+    };
+
+    // Combine in proper order
+    return {
+      ...identityData,
+      ...subjectGrades,
+      ...summaryData
+    };
+  });
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
@@ -227,14 +238,14 @@ const GenReport = () => {
       // Add title (centered and bold)
       doc.setFontSize(16);
       doc.setFont('Times', 'bold');
-      const title = `${school.name} - Results`;
+      const title = `${school.name}`;
       const titleWidth = doc.getStringUnitWidth(title) * doc.internal.getFontSize() / doc.internal.scaleFactor;
       doc.text(title, (pageWidth - titleWidth) / 2, 20);
 
       // Add subtitle (centered)
       doc.setFontSize(12);
       doc.setFont('Times', 'normal');
-      const subtitle = `Class: ${selectedClass} - ${selectedTerm} ${selectedSession}`;
+      const subtitle = `Result for : ${selectedClass} - ${selectedTerm} ${selectedSession}`;
       const subtitleWidth = doc.getStringUnitWidth(subtitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
       doc.text(subtitle, (pageWidth - subtitleWidth) / 2, 28);
 
@@ -326,7 +337,7 @@ const GenReport = () => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 0 }}>
       <IconButton onClick={() => navigate(-1)}><ArrowBack /></IconButton>
       <Typography variant="h5" gutterBottom>View Results</Typography>
 
