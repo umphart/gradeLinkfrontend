@@ -7,20 +7,40 @@ const api = axios.create({
 
 export const registerSchool = async (formData) => {
   try {
-    const response = await api.post('/schools/register', formData, {
+    const form = new FormData();
+    
+    // Append school data
+    form.append('school[name]', formData.schoolName);
+    form.append('school[email]', formData.email);
+    form.append('school[phone]', formData.phone || '');
+    form.append('school[address]', formData.address);
+    form.append('school[city]', formData.city || '');
+    form.append('school[state]', formData.state || '');
+    
+    // Append admin data
+    form.append('admin[firstName]', formData.adminFirstName);
+    form.append('admin[lastName]', formData.adminLastName);
+    form.append('admin[email]', formData.adminEmail);
+    form.append('admin[phone]', formData.adminPhone || '');
+    form.append('admin[password]', formData.adminPassword);
+    
+    // Append logo file if exists
+    if (formData.schoolLogo) {
+      form.append('schoolLogo', formData.schoolLogo);
+    }
+
+    const response = await api.post('/schools/register', form, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
     
-    // Ensure consistent response format
     return {
       success: true,
       ...response.data
     };
     
   } catch (error) {
-    // Return error in consistent format
     return {
       success: false,
       message: error.response?.data?.message || 
@@ -28,38 +48,4 @@ export const registerSchool = async (formData) => {
               'Registration failed'
     };
   }
-};
-
-export const loginUser = async (email,  password) => {
-  try {
-    const response = await axios.post('http://localhost:5000/api/login', { email, password });
-    return response.data;
-  } catch (error) {
-    console.error('Login error:', error);
-    throw error;
-  }
-};
-
-export const getSchoolDetails = async (schoolId) => {
-  const response = await api.get(`/schools/${schoolId}`);
-  return response.data;
-};
-
-export const updateSchool = async (schoolId, formData) => {
-  const response = await axios.patch(`/schools/${schoolId}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
-  return response.data;
-};
-
-export const getClasses = async () => {
-  const response = await api.get('/schools/classes');
-  return response.data;
-};
-
-export const getTerms = async () => {
-  const response = await api.get('/schools/terms');
-  return response.data;
 };
