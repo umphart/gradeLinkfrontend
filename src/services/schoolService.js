@@ -11,7 +11,7 @@ const api = axios.create({
 export const registerSchool = async (formData) => {
   try {
     const response = await axios.post(
-      'https://gradelink.onrender.com/api/schools/register', 
+      'https://gradelink.onrender.com/schools/register', 
       formData,
       {
         headers: { 'Content-Type': 'multipart/form-data' },

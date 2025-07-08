@@ -136,8 +136,7 @@ const SchoolRegistration = () => {
     setActiveStep(prev => prev - 1);
     setError(null);
   };
-
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   
   if (!validateStep(activeStep)) return;
@@ -146,38 +145,54 @@ const SchoolRegistration = () => {
     setLoading(true);
     setError(null);
 
-    const payload = {
-      school: {
-        name: formData.schoolName,
-        email: formData.email,
-        phone: formData.phone,
-        address: {
-          street: formData.address,
-          city: formData.city,
-          state: formData.state
-        }
-      },
-      admin: {
-        firstName: formData.adminFirstName,
-        lastName: formData.adminLastName,
-        email: formData.adminEmail,
-        phone: formData.adminPhone,
-        password: formData.adminPassword
-      }
-    };
-
+    // Create FormData and append all fields individually
     const form = new FormData();
-    form.append('data', JSON.stringify(payload));
+    
+    // Append school data
+    form.append('school[name]', formData.schoolName);
+    form.append('school[email]', formData.email);
+    form.append('school[phone]', formData.phone);
+    form.append('school[address][street]', formData.address);
+    form.append('school[address][city]', formData.city);
+    form.append('school[address][state]', formData.state);
+    
+    // Append admin data
+    form.append('admin[firstName]', formData.adminFirstName);
+    form.append('admin[lastName]', formData.adminLastName);
+    form.append('admin[email]', formData.adminEmail);
+    form.append('admin[phone]', formData.adminPhone);
+    form.append('admin[password]', formData.adminPassword);
+    
+    // Append logo file if exists
     if (formData.schoolLogo) {
       form.append('schoolLogo', formData.schoolLogo);
     }
 
-    await registerSchool(form);
-    setSuccess(true);
-    setTimeout(() => navigate('/admin-login'), 3000);
+    // Send request
+    const response = await registerSchool(form);
+    
+    if (response.success) {
+      setSuccess(true);
+      setTimeout(() => navigate('/admin-login'), 3000);
+    } else {
+      throw new Error(response.message || 'Registration failed');
+    }
   } catch (err) {
     console.error('Registration error:', err);
-    setError(err.message || 'Registration failed. Please try again.');
+    
+    // More specific error messages
+    let errorMessage = 'Registration failed. Please try again.';
+    if (err.message.includes('Network Error')) {
+      errorMessage = 'Cannot connect to server. Check your internet connection.';
+    } else if (err.message.includes('404')) {
+      errorMessage = 'Server endpoint not found. Please contact support.';
+    } else if (err.message.includes('500')) {
+      errorMessage = 'Server error. Please try again later.';
+    } else {
+      errorMessage = err.message || errorMessage;
+    }
+    
+    setError(errorMessage);
   } finally {
     setLoading(false);
   }
