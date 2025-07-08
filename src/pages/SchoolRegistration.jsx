@@ -145,7 +145,6 @@ const handleSubmit = async (e) => {
     setLoading(true);
     setError(null);
 
-    // Create FormData and append all fields individually
     const form = new FormData();
     
     // Append school data
@@ -163,36 +162,24 @@ const handleSubmit = async (e) => {
     form.append('admin[phone]', formData.adminPhone);
     form.append('admin[password]', formData.adminPassword);
     
-    // Append logo file if exists
+    // Append logo file
     if (formData.schoolLogo) {
       form.append('schoolLogo', formData.schoolLogo);
     }
 
-    // Send request
-    const response = await registerSchool(form);
+    // Get response from service
+    const { success, message, ...responseData } = await registerSchool(form);
     
-    if (response.success) {
+    if (success) {
       setSuccess(true);
       setTimeout(() => navigate('/admin-login'), 3000);
     } else {
-      throw new Error(response.message || 'Registration failed');
+      throw new Error(message);
     }
+    
   } catch (err) {
     console.error('Registration error:', err);
-    
-    // More specific error messages
-    let errorMessage = 'Registration failed. Please try again.';
-    if (err.message.includes('Network Error')) {
-      errorMessage = 'Cannot connect to server. Check your internet connection.';
-    } else if (err.message.includes('404')) {
-      errorMessage = 'Server endpoint not found. Please contact support.';
-    } else if (err.message.includes('500')) {
-      errorMessage = 'Server error. Please try again later.';
-    } else {
-      errorMessage = err.message || errorMessage;
-    }
-    
-    setError(errorMessage);
+    setError(err.message || 'Registration failed. Please try again.');
   } finally {
     setLoading(false);
   }

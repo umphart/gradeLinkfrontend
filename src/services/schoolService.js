@@ -1,29 +1,32 @@
 import axios from 'axios';
 
-// Directly use your Render URL
-const API_BASE_URL = 'https://gradelink.onrender.com/api';
-
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000, // 30 seconds timeout
+  baseURL: 'https://gradelink.onrender.com',
+  timeout: 20000,
 });
 
 export const registerSchool = async (formData) => {
   try {
-    const response = await axios.post(
-      'https://gradelink.onrender.com/schools/register', 
-      formData,
-      {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 20000
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error.response?.status === 502) {
-      throw new Error('Our servers are currently busy. Please try again in 2-3 minutes.');
-    }
+    const response = await api.post('/schools/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     
+    // Ensure consistent response format
+    return {
+      success: true,
+      ...response.data
+    };
+    
+  } catch (error) {
+    // Return error in consistent format
+    return {
+      success: false,
+      message: error.response?.data?.message || 
+              error.message || 
+              'Registration failed'
+    };
   }
 };
 
