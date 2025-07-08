@@ -167,8 +167,7 @@ const handleSubmit = async (e) => {
       form.append('schoolLogo', formData.schoolLogo);
     }
 
-    // Call the service
-        const response = await registerSchool(form);
+   const response = await registerSchool(form);
     
     // Check for success in the response
     if (response.success) {

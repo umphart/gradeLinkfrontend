@@ -1,31 +1,49 @@
-import axios from 'axios';
+  import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'https://gradelink.onrender.com',
-  timeout: 20000,
-});
+  const api = axios.create({
+    baseURL: 'https://gradelink.onrender.com',
+    timeout: 20000,
+  });
 
-// services/schoolService.js
-export const registerSchool = async (formData) => {
+  // services/schoolService.js
+  export const registerSchool = async (formData) => {
   try {
     const response = await axios.post('/api/schools/register', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-    return response;
-  } catch (error) {
-    // Handle and format the error response consistently
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      throw new Error(error.response.data.message || 'Registration failed');
-    } else if (error.request) {
-      // The request was made but no response was received
-      throw new Error('No response from server. Please try again.');
-    } else {
-      // Something happened in setting up the request
-      throw new Error('Request setup error: ' + error.message);
+    
+    // Ensure the response has the expected structure
+    if (!response.data) {
+      throw new Error('No data received from server');
     }
+    
+    return response.data;
+    
+  } catch (error) {
+    let errorMessage = 'Registration failed';
+    
+    if (error.response) {
+      // Server responded with error status (4xx, 5xx)
+      errorMessage = error.response.data?.message || 
+                    error.response.statusText || 
+                    `Server responded with status ${error.response.status}`;
+    } else if (error.request) {
+      // No response received
+      errorMessage = 'No response from server - the server might be down';
+    } else {
+      // Request setup error
+      errorMessage = error.message;
+    }
+    
+    console.error('Registration error details:', {
+      error: error,
+      config: error.config,
+      response: error.response
+    });
+    
+    throw new Error(errorMessage);
   }
 };
 
