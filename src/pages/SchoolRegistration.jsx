@@ -168,24 +168,28 @@ const handleSubmit = async (e) => {
     }
 
     // Call the service
-    const response = await registerSchool(form);
+        const response = await registerSchool(form);
     
-    // Check for success - adjust this based on your actual API response structure
-    if (response.data && response.data.success) {
+    // Check for success in the response
+    if (response.success) {
       setSuccess(true);
       setTimeout(() => navigate('/admin-login'), 3000);
     } else {
-      throw new Error(response.message || 'Registration failed. Please try again.');
+      throw new Error(response.message || 'Registration failed without error details');
     }
     
   } catch (err) {
-    console.error('Registration error:', err);
-    setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
+    console.error('Full registration error:', err);
+    setError(err.message || 'Registration failed. Please check your details and try again.');
+    
+    // If it's a validation error from server with multiple messages
+    if (err.response?.data?.errors) {
+      setError(Object.values(err.response.data.errors).join('. '));
+    }
   } finally {
     setLoading(false);
   }
 };
-
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ 
