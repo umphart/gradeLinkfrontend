@@ -1,15 +1,39 @@
-// src/services/schoolService.js
-import api from './api';
 import axios from 'axios';
 
-export const registerSchool = async (formData) => {
-  return await axios.post('http://localhost:5000/api/schools/register', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-};
+// Directly use your Render URL
+const API_BASE_URL = 'https://gradelink.onrender.com/api';
 
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000, // 30 seconds timeout
+});
+
+export const registerSchool = async (formData) => {
+  try {
+    const response = await api.post('/schools/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    let errorMessage = 'Registration failed. Please try again.';
+    
+    if (error.response) {
+      errorMessage = error.response.data?.message || 
+        `Server error: ${error.response.status}`;
+    } else if (error.request) {
+      errorMessage = 'Cannot connect to server. Please:';
+      errorMessage += '\n1. Check your internet connection';
+      errorMessage += '\n2. Try again later';
+    } else {
+      errorMessage = `Error: ${error.message}`;
+    }
+
+    throw new Error(errorMessage);
+  }
+};
 
 export const loginUser = async (email,  password) => {
   try {

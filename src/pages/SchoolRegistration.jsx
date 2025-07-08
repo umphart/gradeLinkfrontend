@@ -11,26 +11,29 @@ import {
   Alert,
   Grid,
   Paper,
-  Avatar
+  Avatar,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
 import {
   School as SchoolIcon,
   Person as PersonIcon,
-  CheckCircle as CheckCircleIcon
+  CheckCircle as CheckCircleIcon,
+  CloudUpload as CloudUploadIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerSchool } from '../services/schoolService';
 import { CircularProgress } from '@mui/material';
 
-const steps = ['School Information', 'Admin Details', 'Upload Bardge', 'Complete'];
+const steps = ['School Information', 'Admin Details', 'Upload Logo', 'Review & Submit'];
 
 const SchoolRegistration = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [logoPreview, setLogoPreview] = useState(null);
 
   const [formData, setFormData] = useState({
     schoolName: '',
@@ -40,14 +43,12 @@ const SchoolRegistration = () => {
     city: '',
     state: '',
     schoolLogo: null,
-
     adminFirstName: '',
     adminLastName: '',
     adminEmail: '',
     adminPhone: '',
     adminPassword: '',
     confirmPassword: '',
-
     termsAccepted: false
   });
 
@@ -55,43 +56,91 @@ const SchoolRegistration = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-    setFormData((prev) => ({
+    
+    if (type === 'file' && files && files[0]) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+      };
+      reader.readAsDataURL(files[0]);
+    }
+
+    setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value
     }));
   };
 
-  const handleNext = () => {
-    const requiredFieldsStep0 = ['schoolName', 'email', 'address'];
-    const requiredFieldsStep1 = ['adminFirstName', 'adminLastName', 'adminEmail', 'adminPassword', 'confirmPassword'];
+  const validateStep = (step) => {
+    let isValid = true;
+    const errors = [];
 
-    const fieldsToCheck =
-      activeStep === 0 ? requiredFieldsStep0 :
-      activeStep === 1 ? requiredFieldsStep1 :
-      [];
-
-    const hasErrors = fieldsToCheck.some(field => !formData[field] || (field === 'email' && !formData[field].includes('@')));
-
-    if (hasErrors) {
-      setError('Please fill in all required fields correctly.');
-      return;
+    if (step === 0) {
+      if (!formData.schoolName.trim()) {
+        errors.push('School name is required');
+        isValid = false;
+      }
+      if (!formData.email.includes('@') || !formData.email.includes('.')) {
+        errors.push('Valid email is required');
+        isValid = false;
+      }
+      if (!formData.address.trim()) {
+        errors.push('Address is required');
+        isValid = false;
+      }
+    } else if (step === 1) {
+      if (!formData.adminFirstName.trim() || !formData.adminLastName.trim()) {
+        errors.push('Admin name is required');
+        isValid = false;
+      }
+      if (!formData.adminEmail.includes('@') || !formData.adminEmail.includes('.')) {
+        errors.push('Valid admin email is required');
+        isValid = false;
+      }
+      if (formData.adminPassword.length < 8) {
+        errors.push('Password must be at least 8 characters');
+        isValid = false;
+      }
+      if (formData.adminPassword !== formData.confirmPassword) {
+        errors.push('Passwords do not match');
+        isValid = false;
+      }
+    } else if (step === 2) {
+      if (!formData.schoolLogo) {
+        errors.push('School logo is required');
+        isValid = false;
+      }
+    } else if (step === 3) {
+      if (!formData.termsAccepted) {
+        errors.push('You must accept the terms and conditions');
+        isValid = false;
+      }
     }
 
-    setError(null);
-    setActiveStep(prev => prev + 1);
+    if (errors.length > 0) {
+      setError(errors.join('. '));
+    } else {
+      setError(null);
+    }
+
+    return isValid;
+  };
+
+  const handleNext = () => {
+    if (validateStep(activeStep)) {
+      setActiveStep(prev => prev + 1);
+    }
   };
 
   const handleBack = () => {
     setActiveStep(prev => prev - 1);
+    setError(null);
   };
 
  const handleSubmit = async (e) => {
   e.preventDefault();
-
-  if (formData.adminPassword !== formData.confirmPassword) {
-    setError('Passwords do not match.');
-    return;
-  }
+  
+  if (!validateStep(activeStep)) return;
 
   try {
     setLoading(true);
@@ -127,64 +176,100 @@ const SchoolRegistration = () => {
     setSuccess(true);
     setTimeout(() => navigate('/admin-login'), 3000);
   } catch (err) {
-    console.error(err);
-    setLoading(false); // Stop loading if there's an error
-    setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    console.error('Registration error:', err);
+    setError(err.message || 'Registration failed. Please try again.');
+  } finally {
+    setLoading(false);
   }
 };
 
-
-if (loading) {
-  return (
-    <Container maxWidth="sm" sx={{ mt: 10, display: 'flex', justifyContent: 'center' }}>
-      <Paper
-        elevation={4}
-        sx={{
+  if (loading) {
+    return (
+      <Container maxWidth="sm" sx={{ 
+        mt: 10, 
+        display: 'flex', 
+        justifyContent: 'center',
+        minHeight: '80vh',
+        alignItems: 'center'
+      }}>
+        <Paper elevation={4} sx={{
           p: 4,
           textAlign: 'center',
           borderRadius: 4,
-          backgroundColor: '#f5f5f5',
-        }}
-      >
-        <Typography variant="h5" color="primary" gutterBottom>
-          Submitting Your Registration...
-        </Typography>
+          width: '100%',
+          maxWidth: 500
+        }}>
+          <CircularProgress size={60} thickness={4} sx={{ mb: 3 }} />
+          <Typography variant="h5" gutterBottom>
+            Creating Your School Account
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            This may take a few moments. Please don't close this page.
+          </Typography>
+        </Paper>
+      </Container>
+    );
+  }
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Please wait while we process your information.
-        </Typography>
+  if (success) {
+    return (
+      <Container maxWidth="sm" sx={{ 
+        mt: 10, 
+        display: 'flex', 
+        justifyContent: 'center',
+        minHeight: '80vh',
+        alignItems: 'center'
+      }}>
+        <Paper elevation={4} sx={{
+          p: 4,
+          textAlign: 'center',
+          borderRadius: 4,
+          width: '100%',
+          maxWidth: 500
+        }}>
+          <CheckCircleIcon sx={{ 
+            fontSize: 60, 
+            color: 'success.main', 
+            mb: 3,
+            animation: 'pulse 1.5s infinite'
+          }} />
+          <Typography variant="h4" gutterBottom>
+            Registration Successful!
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            Your school account has been created. Redirecting to login...
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => navigate('/admin-login')}
+            sx={{ mt: 2 }}
+          >
+            Go to Login Now
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
 
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <CircularProgress size={40} thickness={4} />
-        </Box>
-      </Paper>
-    </Container>
-  );
-}
-
-if (success) {
   return (
-    <Container maxWidth="md">
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '80vh', textAlign: 'center' }}>
-        <CheckCircleIcon sx={{ fontSize: 80, color: 'success.main', mb: 3 }} />
-        <Typography variant="h4" gutterBottom>Registration Successful!</Typography>
-        <Typography variant="body1" sx={{ mb: 3,  color:'wheat'}}>You’ll be redirected to the login page shortly.</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Didn’t get redirected? <Link to="/login">Click here to login</Link>
-        </Typography>
-      </Box>
-    </Container>
-  );
-}
-
-
-  return (
-    <Container maxWidth="md">
-      <Paper elevation={3} sx={{ p: 4, mt: 4 ,backgroundColor: 'rgba(255, 255, 255, 0.80)'}}>
-        <Box sx={{ mb: 4, textAlign: 'center'}}>
-          <SchoolIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h4" gutterBottom>Register Your School</Typography>
-          <Typography variant="body1" color="text.secondary">Complete the following steps to register your school</Typography>
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Paper elevation={3} sx={{ 
+        p: { xs: 2, md: 4 }, 
+        borderRadius: 4,
+        backgroundColor: 'background.paper'
+      }}>
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <SchoolIcon sx={{ 
+            fontSize: 60, 
+            color: 'primary.main', 
+            mb: 2 
+          }} />
+          <Typography variant="h4" gutterBottom>
+            Register Your School
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Complete the following steps to register your school
+          </Typography>
         </Box>
 
         <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
@@ -195,27 +280,69 @@ if (success) {
           ))}
         </Stepper>
 
-        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
 
         {activeStep === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <TextField fullWidth label="School Name" name="schoolName" value={formData.schoolName} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="School Name *"
+                name="schoolName"
+                value={formData.schoolName}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="School Email" name="email" value={formData.email} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="School Email *"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="School Phone" name="phone" value={formData.phone} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="School Phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth label="Address" name="address" value={formData.address} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Address *"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+              />
             </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleChange} />
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="City"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+              />
             </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleChange} />
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="State"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+              />
             </Grid>
           </Grid>
         )}
@@ -223,40 +350,94 @@ if (success) {
         {activeStep === 1 && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="First Name" name="adminFirstName" value={formData.adminFirstName} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="First Name *"
+                name="adminFirstName"
+                value={formData.adminFirstName}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Last Name" name="adminLastName" value={formData.adminLastName} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Last Name *"
+                name="adminLastName"
+                value={formData.adminLastName}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Email" name="adminEmail" value={formData.adminEmail} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Email *"
+                name="adminEmail"
+                type="email"
+                value={formData.adminEmail}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Phone" name="adminPhone" value={formData.adminPhone} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Phone"
+                name="adminPhone"
+                type="tel"
+                value={formData.adminPhone}
+                onChange={handleChange}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Password" type="password" name="adminPassword" value={formData.adminPassword} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Password *"
+                type="password"
+                name="adminPassword"
+                value={formData.adminPassword}
+                onChange={handleChange}
+                helperText="Minimum 8 characters"
+              />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+              <TextField
+                fullWidth
+                label="Confirm Password *"
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
             </Grid>
           </Grid>
         )}
 
         {activeStep === 2 && (
-          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            gap: 2,
+            py: 4
+          }}>
             <Avatar
-              src={formData.schoolLogo ? URL.createObjectURL(formData.schoolLogo) : ''}
-              sx={{ width: 100, height: 100, mb: 2 }}
+              src={logoPreview || ''}
+              sx={{ 
+                width: 150, 
+                height: 150, 
+                mb: 2,
+                fontSize: 60,
+                bgcolor: 'primary.main'
+              }}
             >
               {formData.schoolName ? formData.schoolName.charAt(0).toUpperCase() : 'S'}
             </Avatar>
             <Button
-              variant="outlined"
+              variant="contained"
               component="label"
               startIcon={<CloudUploadIcon />}
+              sx={{ mb: 2 }}
             >
-              Upload School Logo
+              Upload School Logo *
               <input
                 type="file"
                 hidden
@@ -266,77 +447,174 @@ if (success) {
               />
             </Button>
             {formData.schoolLogo && (
-              <Typography variant="caption" sx={{ mt: 1 }}>
-                {formData.schoolLogo.name}
+              <Typography variant="body2">
+                Selected: {formData.schoolLogo.name}
               </Typography>
             )}
+            <Typography variant="caption" color="text.secondary">
+              Recommended size: 500x500px, Max 5MB
+            </Typography>
           </Box>
         )}
 
         {activeStep === 3 && (
-          <form onSubmit={handleSubmit}>
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>Review and Submit</Typography>
+          <Box component="form" onSubmit={handleSubmit}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
+              Review Your Information
+            </Typography>
 
-             <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #eee' }}>
-  <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-    {/* Left side: School Info */}
-    <Box>
-      <Typography variant="subtitle1" gutterBottom>
-        <SchoolIcon sx={{ mr: 1 }} /> School Info
-      </Typography>
-      <Typography><strong>Name:</strong> {formData.schoolName}</Typography>
-      <Typography><strong>Email:</strong> {formData.email}</Typography>
-      <Typography><strong>Address:</strong> {formData.address}, {formData.city}, {formData.state}</Typography>
-    </Box>
+            <Paper elevation={0} sx={{ 
+              p: 3, 
+              mb: 3, 
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2
+            }}>
+              <Typography variant="subtitle1" gutterBottom sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                mb: 2
+              }}>
+                <SchoolIcon sx={{ mr: 1 }} /> School Information
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography><strong>Name:</strong> {formData.schoolName}</Typography>
+                  <Typography><strong>Email:</strong> {formData.email}</Typography>
+                  <Typography><strong>Phone:</strong> {formData.phone || 'Not provided'}</Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography><strong>Address:</strong></Typography>
+                  <Typography>
+                    {formData.address}, {formData.city}, {formData.state}
+                  </Typography>
+                </Grid>
+                {logoPreview && (
+                  <Grid item xs={12}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      mt: 2,
+                      gap: 2
+                    }}>
+                      <Typography><strong>Logo:</strong></Typography>
+                      <Avatar
+                        src={logoPreview}
+                        alt="School Logo Preview"
+                        sx={{ width: 60, height: 60 }}
+                      />
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            </Paper>
 
-    {/* Right side: School Logo */}
-    {formData.schoolLogo && (
-      <Box display="flex" flexDirection="column" alignItems="center" ml={4}>
-        <Typography variant="body2" sx={{ mb: 1 }}><strong>School Logo:</strong></Typography>
-        <Avatar
-          src={URL.createObjectURL(formData.schoolLogo)}
-          alt="School Logo"
-          sx={{ width: 100, height: 100 }}
-        />
-      </Box>
-    )}
-  </Box>
-</Paper>
+            <Paper elevation={0} sx={{ 
+              p: 3, 
+              mb: 3, 
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2
+            }}>
+              <Typography variant="subtitle1" gutterBottom sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                mb: 2
+              }}>
+                <PersonIcon sx={{ mr: 1 }} /> Admin Information
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Typography><strong>Name:</strong> {formData.adminFirstName} {formData.adminLastName}</Typography>
+                  <Typography><strong>Email:</strong> {formData.adminEmail}</Typography>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography><strong>Phone:</strong> {formData.adminPhone || 'Not provided'}</Typography>
+                </Grid>
+              </Grid>
+            </Paper>
 
-
-
-              <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #eee' }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  <PersonIcon sx={{ mr: 1 }} /> Admin Info
-                </Typography>
-                <Typography><strong>Name:</strong> {formData.adminFirstName} {formData.adminLastName}</Typography>
-                <Typography><strong>Email:</strong> {formData.adminEmail}</Typography>
-              </Paper>
-
-              <Box sx={{ p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.termsAccepted}
+                  onChange={handleChange}
+                  name="termsAccepted"
+                  color="primary"
+                />
+              }
+              label={
                 <Typography variant="body2">
-                  By submitting this form, you agree to our <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>.
+                  I agree to the <Link to="/terms" target="_blank">Terms of Service</Link> and <Link to="/privacy" target="_blank">Privacy Policy</Link>
                 </Typography>
-              </Box>
+              }
+              sx={{ mb: 3 }}
+            />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                <Button onClick={handleBack} variant="outlined">Back</Button>
-                <Button type="submit" variant="contained">Submit Registration</Button>
-              </Box>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              mt: 4,
+              gap: 2
+            }}>
+              <Button 
+                onClick={handleBack} 
+                variant="outlined" 
+                startIcon={<ArrowBackIcon />}
+                sx={{ flex: 1 }}
+              >
+                Back
+              </Button>
+              <Button 
+                type="submit" 
+                variant="contained" 
+                sx={{ flex: 1 }}
+                disabled={!formData.termsAccepted}
+              >
+                Submit Registration
+              </Button>
             </Box>
-          </form>
-        )}
-
-        {activeStep < 3 && (
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Button onClick={handleBack} disabled={activeStep === 0} variant="outlined">Back</Button>
-            <Button variant="contained" onClick={handleNext}>Next</Button>
           </Box>
         )}
 
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
-     <Link to="/"  style={{ textDecoration: 'none', color: '#1976d2' }}>⬅️ </Link> Already have an account? <Link to="/admin-login"  style={{ textDecoration: 'none', color: '#1976d2' }}>login</Link>
+        {activeStep < 3 && (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            mt: 4,
+            gap: 2
+          }}>
+            <Button 
+              onClick={handleBack} 
+              disabled={activeStep === 0} 
+              variant="outlined"
+              sx={{ flex: 1 }}
+            >
+              Back
+            </Button>
+            <Button 
+              onClick={handleNext} 
+              variant="contained"
+              sx={{ flex: 1 }}
+            >
+              {activeStep === steps.length - 2 ? 'Review' : 'Next'}
+            </Button>
+          </Box>
+        )}
+
+        <Box sx={{ 
+          mt: 4, 
+          textAlign: 'center',
+          pt: 2,
+          borderTop: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Typography variant="body2">
+            Already have an account?{' '}
+            <Link to="/admin-login" style={{ fontWeight: 500 }}>
+              Login here
+            </Link>
+          </Typography>
         </Box>
       </Paper>
     </Container>
