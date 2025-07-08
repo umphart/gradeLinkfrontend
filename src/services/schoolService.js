@@ -10,28 +10,20 @@ const api = axios.create({
 
 export const registerSchool = async (formData) => {
   try {
-    const response = await api.post('/schools/register', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
+    const response = await axios.post(
+      'https://gradelink.onrender.com/api/schools/register', 
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 20000
+      }
+    );
     return response.data;
   } catch (error) {
-    let errorMessage = 'Registration failed. Please try again.';
-    
-    if (error.response) {
-      errorMessage = error.response.data?.message || 
-        `Server error: ${error.response.status}`;
-    } else if (error.request) {
-      errorMessage = 'Cannot connect to server. Please:';
-      errorMessage += '\n1. Check your internet connection';
-      errorMessage += '\n2. Try again later';
-    } else {
-      errorMessage = `Error: ${error.message}`;
+    if (error.response?.status === 502) {
+      throw new Error('Our servers are currently busy. Please try again in 2-3 minutes.');
     }
-
-    throw new Error(errorMessage);
+    
   }
 };
 
