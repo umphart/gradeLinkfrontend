@@ -8,7 +8,7 @@
   // services/schoolService.js
   export const registerSchool = async (formData) => {
   try {
-    const response = await axios.post('/api/schools/register', formData, {
+    const response = await axios.post('/schools/register', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
