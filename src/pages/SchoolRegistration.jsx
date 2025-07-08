@@ -146,26 +146,26 @@ const handleSubmit = async (e) => {
     setError(null);
 
     const form = new FormData();
-    
-    // Append school data
-    form.append('school[name]', formData.schoolName);
-    form.append('school[email]', formData.email);
-    form.append('school[phone]', formData.phone);
-    form.append('school[address][street]', formData.address);
-    form.append('school[address][city]', formData.city);
-    form.append('school[address][state]', formData.state);
-    
-    // Append admin data
-    form.append('admin[firstName]', formData.adminFirstName);
-    form.append('admin[lastName]', formData.adminLastName);
-    form.append('admin[email]', formData.adminEmail);
-    form.append('admin[phone]', formData.adminPhone);
-    form.append('admin[password]', formData.adminPassword);
-    
-    // Append logo file
-    if (formData.schoolLogo) {
-      form.append('schoolLogo', formData.schoolLogo);
-    }
+
+// Append school object fields
+form.append('school_name', formData.schoolName);
+form.append('school_email', formData.email);
+form.append('school_phone', formData.phone);
+form.append('school_address', formData.address);
+form.append('school_city', formData.city);
+form.append('school_state', formData.state);
+
+// Append admin object fields
+form.append('admin_firstName', formData.adminFirstName);
+form.append('admin_lastName', formData.adminLastName);
+form.append('admin_email', formData.adminEmail);
+form.append('admin_phone', formData.adminPhone);
+form.append('admin_password', formData.adminPassword);
+
+// Append file
+if (formData.schoolLogo) {
+  form.append('schoolLogo', formData.schoolLogo);
+}
 
    const response = await registerSchool(form);
     
