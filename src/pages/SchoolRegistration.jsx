@@ -167,19 +167,20 @@ const handleSubmit = async (e) => {
       form.append('schoolLogo', formData.schoolLogo);
     }
 
-    // Get response from service
-    const { success, message, ...responseData } = await registerSchool(form);
+    // Call the service
+    const response = await registerSchool(form);
     
-    if (success) {
+    // Check for success - adjust this based on your actual API response structure
+    if (response.data && response.data.success) {
       setSuccess(true);
       setTimeout(() => navigate('/admin-login'), 3000);
     } else {
-      throw new Error(message);
+      throw new Error(response.message || 'Registration failed. Please try again.');
     }
     
   } catch (err) {
     console.error('Registration error:', err);
-    setError(err.message || 'Registration failed. Please try again.');
+    setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
   } finally {
     setLoading(false);
   }
