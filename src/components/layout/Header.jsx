@@ -36,14 +36,14 @@ const Header = () => {
               textOverflow: 'ellipsis',
             }}
           >
-            {user?.schoolName || 'School Management System'}
+            {user?.schoolName || 'GradeLink365'}
           </Typography>
         </Box>
 
         {user?.logo && (
           <Box
             component="img"
-            src={`http://localhost:5000/uploads/${user.logo}`}
+            src={`https://gradelink.onrender.com/uploads/${user.logo}`}
             alt="School Logo"
             sx={{
               width: isSmallScreen ? 40 : 60,
