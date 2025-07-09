@@ -43,7 +43,7 @@ const Header = () => {
         {user?.logo && (
           <Box
             component="img"
-            src={`http://localhost:5000/uploads/logos/${user.logo}`}
+            src={`http://localhost:5000/uploads/${user.logo}`}
             alt="School Logo"
             sx={{
               width: isSmallScreen ? 40 : 60,
