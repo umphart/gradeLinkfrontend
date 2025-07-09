@@ -32,17 +32,20 @@ const Login = () => {
     setError(null);
     setLoading(true);
 
-    const response = await axios.post('http://localhost:5000/api/login', { email, password });
+    const response = await axios.post('https://gradelink.onrender.com/admins/login', { email, password });
 
     if (response.status === 200) {
-      const user = response.data.user;
-      localStorage.setItem('school', JSON.stringify({ name: user.schoolName, logo: user.logo }));
-      login(user);
+      const { token, admin } = response.data;
 
-      // Wait for 2 seconds before redirecting
+      // Save token and admin info
+      localStorage.setItem('token', token);
+      localStorage.setItem('admin', JSON.stringify(admin));
+
+      login(admin); // From AuthContext
+
       setTimeout(() => {
         navigate('/admin');
-      }, 2000);
+      }, 1000);
     }
   } catch (err) {
     console.error('Login error:', err);

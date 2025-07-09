@@ -42,13 +42,16 @@ export const registerSchool = async (formData) => {
   }
 };
 
-export const loginUser = async (email,  password) => {
+export const loginUser = async (email, password) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/login', { email, password });
+    const response = await axios.post('https://gradelink.onrender.com/admins/login', { email, password });
+
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
-    throw error;
+    const message =
+      error.response?.data?.message || 'Login failed. Please check your credentials.';
+    throw new Error(message);
   }
 };
 
