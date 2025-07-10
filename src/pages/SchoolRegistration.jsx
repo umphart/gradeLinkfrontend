@@ -152,16 +152,18 @@ const handleSubmit = async (e) => {
       form.append('school_logo', formData.school_logo);
     }
 
-   console.log('Sending form data:');
+    console.log('Sending form data:');
     for (let [key, value] of form.entries()) {
       console.log(key, value instanceof File ? value.name : value);
     }
-       const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
-      method: 'POST',
-      body: form
-  
-    });
 
+    const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
+      method: 'POST',
+      body: form,  // Changed from formData to form
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
 
     const responseText = await response.text();
     console.log('Raw response:', responseText);
@@ -171,7 +173,6 @@ const handleSubmit = async (e) => {
       responseData = responseText ? JSON.parse(responseText) : {};
     } catch (e) {
       console.error('Failed to parse JSON:', e);
-      // If parsing fails but we got some response, show it
       throw new Error(responseText || 'Server returned invalid response');
     }
 
@@ -190,7 +191,7 @@ const handleSubmit = async (e) => {
     console.error('Full error:', {
       error: err,
       stack: err.stack,
-      formData: Array.from(form.entries())
+      formData: formData  // Changed from form to formData
     });
     
     setError(
