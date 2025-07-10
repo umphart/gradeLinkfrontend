@@ -152,56 +152,50 @@ const handleSubmit = async (e) => {
       form.append('school_logo', formData.school_logo);
     }
 
-    // Log the form data being sent (for debugging)
-    console.log('Form data being sent:');
+   console.log('Sending form data:');
     for (let [key, value] of form.entries()) {
-      console.log(key, value);
+      console.log(key, value instanceof File ? value.name : value);
     }
-
-    const response = await fetch('/api/schools/register', {
+     const response = await fetch('/api/schools/register', {
       method: 'POST',
       body: form
     });
 
-    // First check if the response exists
-    if (!response) {
-      throw new Error('No response from server - check network connection');
-    }
-
-    // Log the raw response for debugging
     const responseText = await response.text();
-    console.log('Raw server response:', responseText);
+    console.log('Raw response:', responseText);
 
-    // Try to parse as JSON if response isn't empty
     let responseData;
     try {
       responseData = responseText ? JSON.parse(responseText) : {};
-    } catch (parseError) {
-      console.error('Failed to parse JSON:', parseError);
-      throw new Error('Invalid server response format');
+    } catch (e) {
+      console.error('Failed to parse JSON:', e);
+      // If parsing fails but we got some response, show it
+      throw new Error(responseText || 'Server returned invalid response');
     }
 
-    // Handle error responses
     if (!response.ok) {
       throw new Error(
         responseData.message || 
         responseData.error || 
-        `Registration failed with status ${response.status}`
+        `Registration failed (${response.status})`
       );
     }
 
-    // Success case
     setSuccess(true);
     setTimeout(() => navigate('/admin-login'), 3000);
-    
+
   } catch (err) {
-    console.error('Registration error:', {
+    console.error('Full error:', {
       error: err,
       stack: err.stack,
-      formData: formData
+      formData: Array.from(form.entries())
     });
     
-    setError(err.message || 'Registration failed. Please try again.');
+    setError(
+      err.message.includes('Failed to fetch') ? 
+      'Network error - check your connection' :
+      err.message || 'Registration failed. Please try again.'
+    );
   } finally {
     setLoading(false);
   }
