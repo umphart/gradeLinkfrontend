@@ -125,7 +125,7 @@ const SchoolRegistration = () => {
     setError(null);
   };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   if (!validateStep(activeStep)) return;
 
@@ -152,6 +152,12 @@ const SchoolRegistration = () => {
       form.append('school_logo', formData.school_logo);
     }
 
+    // Log the form data being sent (for debugging)
+    console.log('Form data being sent:');
+    for (let [key, value] of form.entries()) {
+      console.log(key, value);
+    }
+
     const response = await fetch('/api/schools/register', {
       method: 'POST',
       body: form
@@ -159,22 +165,29 @@ const SchoolRegistration = () => {
 
     // First check if the response exists
     if (!response) {
-      throw new Error('No response from server');
+      throw new Error('No response from server - check network connection');
     }
 
-    // Handle non-JSON responses
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error('Non-JSON response:', text);
-      throw new Error(text || 'Registration failed - server error');
+    // Log the raw response for debugging
+    const responseText = await response.text();
+    console.log('Raw server response:', responseText);
+
+    // Try to parse as JSON if response isn't empty
+    let responseData;
+    try {
+      responseData = responseText ? JSON.parse(responseText) : {};
+    } catch (parseError) {
+      console.error('Failed to parse JSON:', parseError);
+      throw new Error('Invalid server response format');
     }
 
-    // Now parse as JSON
-    const data = await response.json();
-
+    // Handle error responses
     if (!response.ok) {
-      throw new Error(data.message || `Registration failed (${response.status})`);
+      throw new Error(
+        responseData.message || 
+        responseData.error || 
+        `Registration failed with status ${response.status}`
+      );
     }
 
     // Success case
@@ -184,7 +197,8 @@ const SchoolRegistration = () => {
   } catch (err) {
     console.error('Registration error:', {
       error: err,
-      stack: err.stack
+      stack: err.stack,
+      formData: formData
     });
     
     setError(err.message || 'Registration failed. Please try again.');
@@ -192,7 +206,6 @@ const SchoolRegistration = () => {
     setLoading(false);
   }
 };
-
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ 
