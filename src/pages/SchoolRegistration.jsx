@@ -123,70 +123,68 @@ const SchoolRegistration = () => {
     setActiveStep(prev => prev - 1);
     setError(null);
   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateStep(activeStep)) return;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep(activeStep)) return;
+  try {
+    setLoading(true);
+    setError(null);
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const form = new FormData();
-      
-      // Use consistent field names (match backend expectations)
-      // School Information
-      form.append('name', formData.schoolName);
-      form.append('email', formData.email);
-      form.append('phone', formData.phone);
-      form.append('address', formData.address);
-      form.append('city', formData.city);
-      form.append('state', formData.state);
-      
-      // Admin Information
-      form.append('adminFirstName', formData.adminFirstName);
-      form.append('adminLastName', formData.adminLastName);
-      form.append('adminEmail', formData.adminEmail);
-      form.append('adminPhone', formData.adminPhone);
-      form.append('adminPassword', formData.adminPassword);
-      
-      // File upload
-      if (formData.schoolLogo) {
-        form.append('logo', formData.schoolLogo); // Match backend field name
-      }
-
-      const response = await registerSchool(form);
-      
-      if (response.success) {
-        setSuccess(true);
-        setTimeout(() => navigate('/admin-login'), 3000);
-      } else {
-        throw new Error(response.message || 'Registration failed');
-      }
-      
-    } catch (err) {
-      console.error('Registration error:', {
-        message: err.message,
-        response: err.response?.data,
-        stack: err.stack
-      });
-      
-      let errorMessage = 'Registration failed. Please try again.';
-      if (err.response?.data) {
-        // Handle different error response formats
-        if (err.response.data.message) {
-          errorMessage = err.response.data.message;
-        } else if (err.response.data.error) {
-          errorMessage = err.response.data.error;
-        } else if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        }
-      }
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+    const form = new FormData();
+    
+    // School Information
+    form.append('name', formData.schoolName);
+    form.append('email', formData.email);
+    form.append('phone', formData.phone);
+    form.append('address', formData.address);
+    form.append('city', formData.city);
+    form.append('state', formData.state);
+    
+    // Admin Information
+    form.append('adminFirstName', formData.adminFirstName);
+    form.append('adminLastName', formData.adminLastName);
+    form.append('adminEmail', formData.adminEmail);
+    form.append('adminPhone', formData.adminPhone);
+    form.append('adminPassword', formData.adminPassword);
+    
+    // File upload
+    if (formData.schoolLogo) {
+      form.append('logo', formData.schoolLogo);
     }
-  };
+
+    const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
+      method: 'POST',
+      body: form,
+      // Don't set Content-Type header - let the browser set it with boundary
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // This will catch 4xx and 5xx errors
+      throw new Error(data.message || 'Registration failed');
+    }
+
+    if (data.success) {
+      setSuccess(true);
+      setTimeout(() => navigate('/admin-login'), 3000);
+    } else {
+      throw new Error(data.message || 'Registration failed');
+    }
+    
+  } catch (err) {
+    console.error('Full registration error:', {
+      error: err,
+      response: err.response?.data,
+      stack: err.stack
+    });
+    
+    setError(err.message || 'Registration failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ 
