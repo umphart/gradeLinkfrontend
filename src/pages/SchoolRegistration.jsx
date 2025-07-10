@@ -123,6 +123,7 @@ const SchoolRegistration = () => {
     setActiveStep(prev => prev - 1);
     setError(null);
   };
+  
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!validateStep(activeStep)) return;
@@ -148,7 +149,7 @@ const handleSubmit = async (e) => {
     form.append('adminPhone', formData.adminPhone);
     form.append('adminPassword', formData.adminPassword);
     
-    // File upload
+    // File upload - field name must match backend ('logo')
     if (formData.schoolLogo) {
       form.append('logo', formData.schoolLogo);
     }
@@ -156,30 +157,20 @@ const handleSubmit = async (e) => {
     const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
       method: 'POST',
       body: form,
-      // Don't set Content-Type header - let the browser set it with boundary
+      // Don't set Content-Type header - browser will set it
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      // This will catch 4xx and 5xx errors
       throw new Error(data.message || 'Registration failed');
     }
 
-    if (data.success) {
-      setSuccess(true);
-      setTimeout(() => navigate('/admin-login'), 3000);
-    } else {
-      throw new Error(data.message || 'Registration failed');
-    }
+    setSuccess(true);
+    setTimeout(() => navigate('/admin-login'), 3000);
     
   } catch (err) {
-    console.error('Full registration error:', {
-      error: err,
-      response: err.response?.data,
-      stack: err.stack
-    });
-    
+    console.error('Registration error:', err);
     setError(err.message || 'Registration failed. Please try again.');
   } finally {
     setLoading(false);
