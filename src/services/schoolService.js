@@ -7,7 +7,7 @@ const api = axios.create({
 
 export const registerSchool = async (formData) => {
   try {
-    const response = await api.post('/schools/register', formData, {
+    const response = await api.post('/api/schools/register', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
