@@ -23,7 +23,6 @@ import {
   ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerSchool } from '../services/schoolService';
 import { CircularProgress } from '@mui/material';
 
 const steps = ['School Information', 'Admin Details', 'Upload Logo', 'Review & Submit'];
@@ -35,22 +34,22 @@ const SchoolRegistration = () => {
   const [loading, setLoading] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
 
-const [formData, setFormData] = useState({
-  school_name: '', // was schoolName
-  school_email: '', // was email
-  school_phone: '',
-  school_address: '',
-  school_city: '',
-  school_state: '',
-  school_logo: null, // was schoolLogo
-  admin_firstName: '', // was adminFirstName
-  admin_lastName: '', // was adminLastName
-  admin_email: '', // was adminEmail
-  admin_phone: '', // was adminPhone
-  admin_password: '', // was adminPassword
-  confirm_password: '', // was confirmPassword
-  terms_accepted: false // was termsAccepted
-});
+  const [formData, setFormData] = useState({
+    school_name: '',
+    school_email: '',
+    school_phone: '',
+    school_address: '',
+    school_city: '',
+    school_state: '',
+    school_logo: null,
+    admin_firstName: '',
+    admin_lastName: '',
+    admin_email: '',
+    admin_phone: '',
+    admin_password: '',
+    confirm_password: '',
+    terms_accepted: false
+  });
 
   const navigate = useNavigate();
 
@@ -73,12 +72,17 @@ const [formData, setFormData] = useState({
         setLogoPreview(reader.result);
       };
       reader.readAsDataURL(files[0]);
-    }
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value
-    }));
+      setFormData(prev => ({
+        ...prev,
+        [name]: files[0]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
     
     // Clear error when user makes changes
     if (error) setError(null);
@@ -88,22 +92,19 @@ const [formData, setFormData] = useState({
     const errors = [];
     
     if (step === 0) {
-      if (!formData.schoolName.trim()) errors.push('School name is required');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push('Valid email is required');
-      if (!formData.address.trim()) errors.push('Address is required');
+      if (!formData.school_name.trim()) errors.push('School name is required');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.school_email)) errors.push('Valid school email is required');
+      if (!formData.school_address.trim()) errors.push('Address is required');
     } 
     else if (step === 1) {
-      if (!formData.adminFirstName.trim()) errors.push('First name is required');
-      if (!formData.adminLastName.trim()) errors.push('Last name is required');
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.adminEmail)) errors.push('Valid admin email is required');
-      if (formData.adminPassword.length < 8) errors.push('Password must be at least 8 characters');
-      if (formData.adminPassword !== formData.confirmPassword) errors.push('Passwords do not match');
-    }
-    else if (step === 2) {
-      if (!formData.schoolLogo) errors.push('School logo is required');
+      if (!formData.admin_firstName.trim()) errors.push('First name is required');
+      if (!formData.admin_lastName.trim()) errors.push('Last name is required');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.admin_email)) errors.push('Valid admin email is required');
+      if (formData.admin_password.length < 8) errors.push('Password must be at least 8 characters');
+      if (formData.admin_password !== formData.confirm_password) errors.push('Passwords do not match');
     }
     else if (step === 3) {
-      if (!formData.termsAccepted) errors.push('You must accept the terms');
+      if (!formData.terms_accepted) errors.push('You must accept the terms');
     }
 
     if (errors.length > 0) {
@@ -124,76 +125,60 @@ const [formData, setFormData] = useState({
     setError(null);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateStep(activeStep)) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateStep(activeStep)) return;
 
-  try {
-    setLoading(true);
-    setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-    const form = new FormData();
-    
-    // School Information (using snake_case to match backend)
-    form.append('school_name', formData.schoolName);
-    form.append('school_email', formData.email);
-    form.append('school_phone', formData.phone);
-    form.append('school_address', formData.address);
-    form.append('school_city', formData.city);
-    form.append('school_state', formData.state);
-    
-    // Admin Information (using snake_case to match backend)
-    form.append('admin_firstName', formData.adminFirstName);
-    form.append('admin_lastName', formData.adminLastName);
-    form.append('admin_email', formData.adminEmail);
-    form.append('admin_phone', formData.adminPhone);
-    form.append('admin_password', formData.adminPassword);
-    
-    // File upload (must match backend expectation)
-    if (formData.schoolLogo) {
-      form.append('school_logo', formData.schoolLogo); // Changed to snake_case
+      const form = new FormData();
+      
+      // Append all form data with correct field names
+      form.append('school_name', formData.school_name);
+      form.append('school_email', formData.school_email);
+      form.append('school_phone', formData.school_phone);
+      form.append('school_address', formData.school_address);
+      form.append('school_city', formData.school_city);
+      form.append('school_state', formData.school_state);
+      
+      // Admin information
+      form.append('admin_firstName', formData.admin_firstName);
+      form.append('admin_lastName', formData.admin_lastName);
+      form.append('admin_email', formData.admin_email);
+      form.append('admin_phone', formData.admin_phone);
+      form.append('admin_password', formData.admin_password);
+      
+      // File upload
+      if (formData.school_logo) {
+        form.append('school_logo', formData.school_logo);
+      }
+
+      const response = await fetch('/api/schools/register', {
+        method: 'POST',
+        body: form
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      const data = await response.json();
+      
+      // Success case
+      setSuccess(true);
+      setTimeout(() => navigate('/admin-login'), 3000);
+      
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const response = await fetch('/api/schools/register', {
-      method: 'POST',
-      body: form
-      // Don't set Content-Type header - browser will set it with boundary
-    });
-
-    // First check if response exists
-    if (!response) {
-      throw new Error('No response from server');
-    }
-
-    // Handle non-JSON responses
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      throw new Error(text || 'Invalid server response');
-    }
-
-    // Now parse as JSON
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `Registration failed (${response.status})`);
-    }
-
-    // Success case
-    setSuccess(true);
-    setTimeout(() => navigate('/admin-login'), 3000);
-    
-  } catch (err) {
-    console.error('Registration error:', {
-      error: err,
-      stack: err.stack
-    });
-    
-    setError(err.message || 'Registration failed. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ 
@@ -303,8 +288,8 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="School Name *"
-                name="schoolName"
-                value={formData.schoo_name}
+                name="school_name"
+                value={formData.school_name}
                 onChange={handleChange}
               />
             </Grid>
@@ -312,9 +297,9 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="School Email *"
-                name="email"
+                name="school_email"
                 type="email"
-                value={formData.email}
+                value={formData.school_email}
                 onChange={handleChange}
               />
             </Grid>
@@ -322,9 +307,9 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="School Phone"
-                name="phone"
+                name="school_phone"
                 type="tel"
-                value={formData.phone}
+                value={formData.school_phone}
                 onChange={handleChange}
               />
             </Grid>
@@ -332,8 +317,8 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="Address *"
-                name="address"
-                value={formData.address}
+                name="school_address"
+                value={formData.school_address}
                 onChange={handleChange}
               />
             </Grid>
@@ -341,8 +326,8 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="City"
-                name="city"
-                value={formData.city}
+                name="school_city"
+                value={formData.school_city}
                 onChange={handleChange}
               />
             </Grid>
@@ -350,8 +335,8 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="State"
-                name="state"
-                value={formData.state}
+                name="school_state"
+                value={formData.school_state}
                 onChange={handleChange}
               />
             </Grid>
@@ -364,8 +349,8 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="First Name *"
-                name="adminFirstName"
-                value={formData.adminFirstName}
+                name="admin_firstName"
+                value={formData.admin_firstName}
                 onChange={handleChange}
               />
             </Grid>
@@ -373,8 +358,8 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="Last Name *"
-                name="adminLastName"
-                value={formData.adminLastName}
+                name="admin_lastName"
+                value={formData.admin_lastName}
                 onChange={handleChange}
               />
             </Grid>
@@ -382,9 +367,9 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="Email *"
-                name="adminEmail"
+                name="admin_email"
                 type="email"
-                value={formData.adminEmail}
+                value={formData.admin_email}
                 onChange={handleChange}
               />
             </Grid>
@@ -392,9 +377,9 @@ const handleSubmit = async (e) => {
               <TextField
                 fullWidth
                 label="Phone"
-                name="adminPhone"
+                name="admin_phone"
                 type="tel"
-                value={formData.adminPhone}
+                value={formData.admin_phone}
                 onChange={handleChange}
               />
             </Grid>
@@ -403,8 +388,8 @@ const handleSubmit = async (e) => {
                 fullWidth
                 label="Password *"
                 type="password"
-                name="adminPassword"
-                value={formData.adminPassword}
+                name="admin_password"
+                value={formData.admin_password}
                 onChange={handleChange}
                 helperText="Minimum 8 characters"
               />
@@ -414,8 +399,8 @@ const handleSubmit = async (e) => {
                 fullWidth
                 label="Confirm Password *"
                 type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
+                name="confirm_password"
+                value={formData.confirm_password}
                 onChange={handleChange}
               />
             </Grid>
@@ -440,7 +425,7 @@ const handleSubmit = async (e) => {
                 bgcolor: 'primary.main'
               }}
             >
-              {formData.schoolName ? formData.schoolName.charAt(0).toUpperCase() : 'S'}
+              {formData.school_name ? formData.school_name.charAt(0).toUpperCase() : 'S'}
             </Avatar>
             <Button
               variant="contained"
@@ -453,13 +438,13 @@ const handleSubmit = async (e) => {
                 type="file"
                 hidden
                 accept="image/*"
-                name="schoolLogo"
+                name="school_logo"
                 onChange={handleChange}
               />
             </Button>
-            {formData.schoolLogo && (
+            {formData.school_logo && (
               <Typography variant="body2">
-                Selected: {formData.schoolLogo.name}
+                Selected: {formData.school_logo.name}
               </Typography>
             )}
             <Typography variant="caption" color="text.secondary">
@@ -490,14 +475,14 @@ const handleSubmit = async (e) => {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
-                  <Typography><strong>Name:</strong> {formData.schoolName}</Typography>
-                  <Typography><strong>Email:</strong> {formData.email}</Typography>
-                  <Typography><strong>Phone:</strong> {formData.phone || 'Not provided'}</Typography>
+                  <Typography><strong>Name:</strong> {formData.school_name}</Typography>
+                  <Typography><strong>Email:</strong> {formData.school_email}</Typography>
+                  <Typography><strong>Phone:</strong> {formData.school_phone || 'Not provided'}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Typography><strong>Address:</strong></Typography>
                   <Typography>
-                    {formData.address}, {formData.city}, {formData.state}
+                    {formData.school_address}, {formData.school_city}, {formData.school_state}
                   </Typography>
                 </Grid>
                 {logoPreview && (
@@ -536,11 +521,11 @@ const handleSubmit = async (e) => {
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
-                  <Typography><strong>Name:</strong> {formData.adminFirstName} {formData.adminLastName}</Typography>
-                  <Typography><strong>Email:</strong> {formData.adminEmail}</Typography>
+                  <Typography><strong>Name:</strong> {formData.admin_firstName} {formData.admin_lastName}</Typography>
+                  <Typography><strong>Email:</strong> {formData.admin_email}</Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Typography><strong>Phone:</strong> {formData.adminPhone || 'Not provided'}</Typography>
+                  <Typography><strong>Phone:</strong> {formData.admin_phone || 'Not provided'}</Typography>
                 </Grid>
               </Grid>
             </Paper>
@@ -548,9 +533,9 @@ const handleSubmit = async (e) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={formData.termsAccepted}
+                  checked={formData.terms_accepted}
                   onChange={handleChange}
-                  name="termsAccepted"
+                  name="terms_accepted"
                   color="primary"
                 />
               }
@@ -580,7 +565,7 @@ const handleSubmit = async (e) => {
                 type="submit" 
                 variant="contained" 
                 sx={{ flex: 1 }}
-                disabled={!formData.termsAccepted}
+                disabled={!formData.terms_accepted}
               >
                 Submit Registration
               </Button>
