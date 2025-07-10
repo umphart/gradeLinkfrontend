@@ -58,6 +58,16 @@ const SchoolRegistration = () => {
     const { name, value, type, checked, files } = e.target;
     
     if (type === 'file' && files && files[0]) {
+      // Validate file before setting
+      if (files[0].size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+      if (!['image/jpeg', 'image/png'].includes(files[0].type)) {
+        setError('Only JPEG and PNG images are allowed');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result);
@@ -69,61 +79,38 @@ const SchoolRegistration = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value
     }));
+    
+    // Clear error when user makes changes
+    if (error) setError(null);
   };
 
   const validateStep = (step) => {
-    let isValid = true;
     const errors = [];
-
+    
     if (step === 0) {
-      if (!formData.schoolName.trim()) {
-        errors.push('School name is required');
-        isValid = false;
-      }
-      if (!formData.email.includes('@') || !formData.email.includes('.')) {
-        errors.push('Valid email is required');
-        isValid = false;
-      }
-      if (!formData.address.trim()) {
-        errors.push('Address is required');
-        isValid = false;
-      }
-    } else if (step === 1) {
-      if (!formData.adminFirstName.trim() || !formData.adminLastName.trim()) {
-        errors.push('Admin name is required');
-        isValid = false;
-      }
-      if (!formData.adminEmail.includes('@') || !formData.adminEmail.includes('.')) {
-        errors.push('Valid admin email is required');
-        isValid = false;
-      }
-      if (formData.adminPassword.length < 8) {
-        errors.push('Password must be at least 8 characters');
-        isValid = false;
-      }
-      if (formData.adminPassword !== formData.confirmPassword) {
-        errors.push('Passwords do not match');
-        isValid = false;
-      }
-    } else if (step === 2) {
-      if (!formData.schoolLogo) {
-        errors.push('School logo is required');
-        isValid = false;
-      }
-    } else if (step === 3) {
-      if (!formData.termsAccepted) {
-        errors.push('You must accept the terms and conditions');
-        isValid = false;
-      }
+      if (!formData.schoolName.trim()) errors.push('School name is required');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push('Valid email is required');
+      if (!formData.address.trim()) errors.push('Address is required');
+    } 
+    else if (step === 1) {
+      if (!formData.adminFirstName.trim()) errors.push('First name is required');
+      if (!formData.adminLastName.trim()) errors.push('Last name is required');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.adminEmail)) errors.push('Valid admin email is required');
+      if (formData.adminPassword.length < 8) errors.push('Password must be at least 8 characters');
+      if (formData.adminPassword !== formData.confirmPassword) errors.push('Passwords do not match');
+    }
+    else if (step === 2) {
+      if (!formData.schoolLogo) errors.push('School logo is required');
+    }
+    else if (step === 3) {
+      if (!formData.termsAccepted) errors.push('You must accept the terms');
     }
 
     if (errors.length > 0) {
       setError(errors.join('. '));
-    } else {
-      setError(null);
+      return false;
     }
-
-    return isValid;
+    return true;
   };
 
   const handleNext = () => {
@@ -136,59 +123,70 @@ const SchoolRegistration = () => {
     setActiveStep(prev => prev - 1);
     setError(null);
   };
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateStep(activeStep)) return;
 
-  try {
-    setLoading(true);
-    setError(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateStep(activeStep)) return;
 
-    const form = new FormData();
+    try {
+      setLoading(true);
+      setError(null);
 
-// Append school object fields
-form.append('school_name', formData.schoolName);
-form.append('school_email', formData.email);
-form.append('school_phone', formData.phone);
-form.append('school_address', formData.address);
-form.append('school_city', formData.city);
-form.append('school_state', formData.state);
+      const form = new FormData();
+      
+      // Use consistent field names (match backend expectations)
+      // School Information
+      form.append('name', formData.schoolName);
+      form.append('email', formData.email);
+      form.append('phone', formData.phone);
+      form.append('address', formData.address);
+      form.append('city', formData.city);
+      form.append('state', formData.state);
+      
+      // Admin Information
+      form.append('adminFirstName', formData.adminFirstName);
+      form.append('adminLastName', formData.adminLastName);
+      form.append('adminEmail', formData.adminEmail);
+      form.append('adminPhone', formData.adminPhone);
+      form.append('adminPassword', formData.adminPassword);
+      
+      // File upload
+      if (formData.schoolLogo) {
+        form.append('logo', formData.schoolLogo); // Match backend field name
+      }
 
-// Append admin object fields
-form.append('admin_firstName', formData.adminFirstName);
-form.append('admin_lastName', formData.adminLastName);
-form.append('admin_email', formData.adminEmail);
-form.append('admin_phone', formData.adminPhone);
-form.append('admin_password', formData.adminPassword);
-
-// Append file
-if (formData.schoolLogo) {
-  form.append('schoolLogo', formData.schoolLogo);
-}
-
-   const response = await registerSchool(form);
-    
-    // Check for success in the response
-    if (response.success) {
-      setSuccess(true);
-      setTimeout(() => navigate('/admin-login'), 3000);
-    } else {
-      throw new Error(response.message || 'Registration failed without error details');
+      const response = await registerSchool(form);
+      
+      if (response.success) {
+        setSuccess(true);
+        setTimeout(() => navigate('/admin-login'), 3000);
+      } else {
+        throw new Error(response.message || 'Registration failed');
+      }
+      
+    } catch (err) {
+      console.error('Registration error:', {
+        message: err.message,
+        response: err.response?.data,
+        stack: err.stack
+      });
+      
+      let errorMessage = 'Registration failed. Please try again.';
+      if (err.response?.data) {
+        // Handle different error response formats
+        if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        }
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    
-  } catch (err) {
-    console.error('Full registration error:', err);
-    setError(err.message || 'Registration failed. Please check your details and try again.');
-    
-    // If it's a validation error from server with multiple messages
-    if (err.response?.data?.errors) {
-      setError(Object.values(err.response.data.errors).join('. '));
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ 
