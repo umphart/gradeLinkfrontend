@@ -35,22 +35,22 @@ const SchoolRegistration = () => {
   const [loading, setLoading] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
 
-  const [formData, setFormData] = useState({
-    schoolName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    schoolLogo: null,
-    adminFirstName: '',
-    adminLastName: '',
-    adminEmail: '',
-    adminPhone: '',
-    adminPassword: '',
-    confirmPassword: '',
-    termsAccepted: false
-  });
+const [formData, setFormData] = useState({
+  school_name: '', // was schoolName
+  school_email: '', // was email
+  school_phone: '',
+  school_address: '',
+  school_city: '',
+  school_state: '',
+  school_logo: null, // was schoolLogo
+  admin_firstName: '', // was adminFirstName
+  admin_lastName: '', // was adminLastName
+  admin_email: '', // was adminEmail
+  admin_phone: '', // was adminPhone
+  admin_password: '', // was adminPassword
+  confirm_password: '', // was confirmPassword
+  terms_accepted: false // was termsAccepted
+});
 
   const navigate = useNavigate();
 
@@ -134,50 +134,49 @@ const handleSubmit = async (e) => {
 
     const form = new FormData();
     
-    // School Information
-    form.append('name', formData.schoolName);
-    form.append('email', formData.email);
-    form.append('phone', formData.phone);
-    form.append('address', formData.address);
-    form.append('city', formData.city);
-    form.append('state', formData.state);
+    // School Information (using snake_case to match backend)
+    form.append('school_name', formData.schoolName);
+    form.append('school_email', formData.email);
+    form.append('school_phone', formData.phone);
+    form.append('school_address', formData.address);
+    form.append('school_city', formData.city);
+    form.append('school_state', formData.state);
     
-    // Admin Information
-    form.append('adminFirstName', formData.adminFirstName);
-    form.append('adminLastName', formData.adminLastName);
-    form.append('adminEmail', formData.adminEmail);
-    form.append('adminPhone', formData.adminPhone);
-    form.append('adminPassword', formData.adminPassword);
+    // Admin Information (using snake_case to match backend)
+    form.append('admin_firstName', formData.adminFirstName);
+    form.append('admin_lastName', formData.adminLastName);
+    form.append('admin_email', formData.adminEmail);
+    form.append('admin_phone', formData.adminPhone);
+    form.append('admin_password', formData.adminPassword);
     
-    // File upload
+    // File upload (must match backend expectation)
     if (formData.schoolLogo) {
-      form.append('schoolLogo', formData.schoolLogo);
+      form.append('school_logo', formData.schoolLogo); // Changed to snake_case
     }
 
     const response = await fetch('/api/schools/register', {
       method: 'POST',
       body: form
+      // Don't set Content-Type header - browser will set it with boundary
     });
 
-    // Handle network errors or no response
+    // First check if response exists
     if (!response) {
-      throw new Error('Network error - no response from server');
+      throw new Error('No response from server');
     }
 
     // Handle non-JSON responses
     const contentType = response.headers.get('content-type');
-    let data;
-    
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
+    if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
-      throw new Error(text || 'Server returned non-JSON response');
+      throw new Error(text || 'Invalid server response');
     }
 
-    // Handle error responses
+    // Now parse as JSON
+    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error(data.message || `Server error: ${response.status}`);
+      throw new Error(data.message || `Registration failed (${response.status})`);
     }
 
     // Success case
@@ -185,7 +184,11 @@ const handleSubmit = async (e) => {
     setTimeout(() => navigate('/admin-login'), 3000);
     
   } catch (err) {
-    console.error('Registration error:', err);
+    console.error('Registration error:', {
+      error: err,
+      stack: err.stack
+    });
+    
     setError(err.message || 'Registration failed. Please try again.');
   } finally {
     setLoading(false);
@@ -301,7 +304,7 @@ const handleSubmit = async (e) => {
                 fullWidth
                 label="School Name *"
                 name="schoolName"
-                value={formData.schoolName}
+                value={formData.schoo_name}
                 onChange={handleChange}
               />
             </Grid>
