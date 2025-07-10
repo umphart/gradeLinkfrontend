@@ -133,72 +133,41 @@ const handleSubmit = async (e) => {
     setLoading(true);
     setError(null);
 
-    const form = new FormData();
+    const formData = new FormData();
     
     // Append all form data with correct field names
-    form.append('school_name', formData.school_name);
-    form.append('school_email', formData.school_email);
-    form.append('school_phone', formData.school_phone);
-    form.append('school_address', formData.school_address);
-    form.append('school_city', formData.school_city);
-    form.append('school_state', formData.school_state);
-    form.append('admin_firstName', formData.admin_firstName);
-    form.append('admin_lastName', formData.admin_lastName);
-    form.append('admin_email', formData.admin_email);
-    form.append('admin_phone', formData.admin_phone);
-    form.append('admin_password', formData.admin_password);
+    formData.append('school_name', formData.school_name);
+    formData.append('school_email', formData.school_email.toLowerCase()); // normalize email
+    formData.append('school_phone', formData.school_phone);
+    formData.append('school_address', formData.school_address);
+    formData.append('school_city', formData.school_city);
+    formData.append('school_state', formData.school_state);
+    formData.append('admin_firstName', formData.admin_firstName);
+    formData.append('admin_lastName', formData.admin_lastName);
+    formData.append('admin_email', formData.admin_email.toLowerCase()); // normalize email
+    formData.append('admin_phone', formData.admin_phone);
+    formData.append('admin_password', formData.admin_password);
     
     if (formData.school_logo) {
-      form.append('school_logo', formData.school_logo);
-    }
-
-    console.log('Sending form data:');
-    for (let [key, value] of form.entries()) {
-      console.log(key, value instanceof File ? value.name : value);
+      formData.append('school_logo', formData.school_logo);
     }
 
     const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
       method: 'POST',
-      body: form,  // Changed from formData to form
-      headers: {
-        'Accept': 'application/json'
-      }
+      body: formData,
+      // Don't set Content-Type header - let the browser set it with boundary
     });
 
-    const responseText = await response.text();
-    console.log('Raw response:', responseText);
-
-    let responseData;
-    try {
-      responseData = responseText ? JSON.parse(responseText) : {};
-    } catch (e) {
-      console.error('Failed to parse JSON:', e);
-      throw new Error(responseText || 'Server returned invalid response');
-    }
+    const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        responseData.message || 
-        responseData.error || 
-        `Registration failed (${response.status})`
-      );
+      throw new Error(data.message || 'Registration failed');
     }
 
     setSuccess(true);
     setTimeout(() => navigate('/admin-login'), 3000);
-
   } catch (err) {
-    console.error('Full error:', {
-      error: err,
-      stack: err.stack,
-      formData: formData  // Changed from form to formData
-    });
-    
-    setError(
-      err.message.includes('Failed to fetch') ? 
-      'Network error - check your connection' :
-      err.message || 'Registration failed. Please try again.'
-    );
+    setError(err.message || 'Registration failed. Please try again.');
   } finally {
     setLoading(false);
   }
