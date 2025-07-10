@@ -126,8 +126,12 @@ const SchoolRegistration = () => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  
+  if (!validateStep(activeStep)) return;
+
   try {
+    setLoading(true);
+    setError(null);
+
     const form = new FormData();
     
     // School Information
@@ -145,9 +149,8 @@ const handleSubmit = async (e) => {
     form.append('adminPhone', formData.adminPhone);
     form.append('adminPassword', formData.adminPassword);
     
-    // File upload - field name must match backend ('logo')
-    // In your form submission handler:
-   if (formData.schoolLogo) {
+    // File upload
+    if (formData.schoolLogo) {
       form.append('schoolLogo', formData.schoolLogo);
     }
 
@@ -155,12 +158,29 @@ const handleSubmit = async (e) => {
       method: 'POST',
       body: form
     });
-    const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
+    // Handle network errors or no response
+    if (!response) {
+      throw new Error('Network error - no response from server');
     }
 
+    // Handle non-JSON responses
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      throw new Error(text || 'Server returned non-JSON response');
+    }
+
+    // Handle error responses
+    if (!response.ok) {
+      throw new Error(data.message || `Server error: ${response.status}`);
+    }
+
+    // Success case
     setSuccess(true);
     setTimeout(() => navigate('/admin-login'), 3000);
     
