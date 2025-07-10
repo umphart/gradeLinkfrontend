@@ -125,59 +125,73 @@ const SchoolRegistration = () => {
     setError(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep(activeStep)) return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateStep(activeStep)) return;
 
-    try {
-      setLoading(true);
-      setError(null);
+  try {
+    setLoading(true);
+    setError(null);
 
-      const form = new FormData();
-      
-      // Append all form data with correct field names
-      form.append('school_name', formData.school_name);
-      form.append('school_email', formData.school_email);
-      form.append('school_phone', formData.school_phone);
-      form.append('school_address', formData.school_address);
-      form.append('school_city', formData.school_city);
-      form.append('school_state', formData.school_state);
-      
-      // Admin information
-      form.append('admin_firstName', formData.admin_firstName);
-      form.append('admin_lastName', formData.admin_lastName);
-      form.append('admin_email', formData.admin_email);
-      form.append('admin_phone', formData.admin_phone);
-      form.append('admin_password', formData.admin_password);
-      
-      // File upload
-      if (formData.school_logo) {
-        form.append('school_logo', formData.school_logo);
-      }
-
-      const response = await fetch('/api/schools/register', {
-        method: 'POST',
-        body: form
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
-
-      const data = await response.json();
-      
-      // Success case
-      setSuccess(true);
-      setTimeout(() => navigate('/admin-login'), 3000);
-      
-    } catch (err) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+    const form = new FormData();
+    
+    // Append all form data with correct field names
+    form.append('school_name', formData.school_name);
+    form.append('school_email', formData.school_email);
+    form.append('school_phone', formData.school_phone);
+    form.append('school_address', formData.school_address);
+    form.append('school_city', formData.school_city);
+    form.append('school_state', formData.school_state);
+    form.append('admin_firstName', formData.admin_firstName);
+    form.append('admin_lastName', formData.admin_lastName);
+    form.append('admin_email', formData.admin_email);
+    form.append('admin_phone', formData.admin_phone);
+    form.append('admin_password', formData.admin_password);
+    
+    if (formData.school_logo) {
+      form.append('school_logo', formData.school_logo);
     }
-  };
+
+    const response = await fetch('/api/schools/register', {
+      method: 'POST',
+      body: form
+    });
+
+    // First check if the response exists
+    if (!response) {
+      throw new Error('No response from server');
+    }
+
+    // Handle non-JSON responses
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
+      throw new Error(text || 'Registration failed - server error');
+    }
+
+    // Now parse as JSON
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Registration failed (${response.status})`);
+    }
+
+    // Success case
+    setSuccess(true);
+    setTimeout(() => navigate('/admin-login'), 3000);
+    
+  } catch (err) {
+    console.error('Registration error:', {
+      error: err,
+      stack: err.stack
+    });
+    
+    setError(err.message || 'Registration failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading) {
     return (
