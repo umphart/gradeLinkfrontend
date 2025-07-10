@@ -156,10 +156,12 @@ const handleSubmit = async (e) => {
     for (let [key, value] of form.entries()) {
       console.log(key, value instanceof File ? value.name : value);
     }
-     const response = await fetch('/api/schools/register', {
+       const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
       method: 'POST',
       body: form
+  
     });
+
 
     const responseText = await response.text();
     console.log('Raw response:', responseText);
