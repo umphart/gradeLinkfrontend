@@ -123,15 +123,11 @@ const SchoolRegistration = () => {
     setActiveStep(prev => prev - 1);
     setError(null);
   };
-  
+
 const handleSubmit = async (e) => {
   e.preventDefault();
-  if (!validateStep(activeStep)) return;
-
+  
   try {
-    setLoading(true);
-    setError(null);
-
     const form = new FormData();
     
     // School Information
@@ -150,16 +146,15 @@ const handleSubmit = async (e) => {
     form.append('adminPassword', formData.adminPassword);
     
     // File upload - field name must match backend ('logo')
-    if (formData.schoolLogo) {
-      form.append('logo', formData.schoolLogo);
+    // In your form submission handler:
+   if (formData.schoolLogo) {
+      form.append('schoolLogo', formData.schoolLogo);
     }
 
-    const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
+    const response = await fetch('/api/schools/register', {
       method: 'POST',
-      body: form,
-      // Don't set Content-Type header - browser will set it
+      body: form
     });
-
     const data = await response.json();
 
     if (!response.ok) {
