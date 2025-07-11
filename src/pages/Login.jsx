@@ -33,12 +33,16 @@ const Login = () => {
     setError(null);
     setLoading(true);
 
-    // Correct endpoint and data structure
-    const response = await axios.post('https://gradelink.onrender.com/api/login', { 
-      email, 
-      password 
-    });
-
+  const response = await axios.post(
+  'https://gradelink.onrender.com/api/login',
+  { email, password },
+  {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  }
+);
     if (response.data.message === 'Login successful') {
       const { user } = response.data;
       
