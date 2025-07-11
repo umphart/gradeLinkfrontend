@@ -19,10 +19,11 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
   const { email, password } = formData;
 
+  // Basic validation
   if (!email || !email.includes('@') || !password) {
     setError('Please enter a valid email and password.');
     return;
@@ -32,17 +33,20 @@ const Login = () => {
     setError(null);
     setLoading(true);
 
-    const response = await axios.post('https://gradelink.onrender.com/admins/login', { email, password });
+    // Correct endpoint and data structure
+    const response = await axios.post('https://gradelink.onrender.com/api/login', { 
+      email, 
+      password 
+    });
 
-    if (response.status === 200) {
-      const { token, admin } = response.data;
+    if (response.data.message === 'Login successful') {
+      const { user } = response.data;
+      
+      // For now, store user data directly (add JWT later)
+      localStorage.setItem('admin', JSON.stringify(user));
+      login(user); // Update auth context
 
-      // Save token and admin info
-      localStorage.setItem('token', token);
-      localStorage.setItem('admin', JSON.stringify(admin));
-
-      login(admin); // From AuthContext
-
+      // Redirect after slight delay for better UX
       setTimeout(() => {
         navigate('/admin');
       }, 1000);
@@ -50,6 +54,7 @@ const Login = () => {
   } catch (err) {
     console.error('Login error:', err);
     setError(err.response?.data?.message || 'Login failed. Please try again.');
+  } finally {
     setLoading(false);
   }
 };
