@@ -1,3 +1,4 @@
+/* Base Styles */
 body {
   background-color: #6296da94;
   background-size: cover;
@@ -5,15 +6,29 @@ body {
   background-position: center;
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
 }
 
-.App {
-  text-align: center;
+/* App Container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Logo Animation */
 .App-logo {
   height: 40vmin;
+  max-height: 200px;
   pointer-events: none;
 }
 
@@ -21,21 +36,6 @@ body {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
 }
 
 @keyframes App-logo-spin {
@@ -46,19 +46,102 @@ body {
     transform: rotate(360deg);
   }
 }
-.app-container {
+
+/* Header Styles */
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  padding: 1rem;
+  box-sizing: border-box;
+  text-align: center;
 }
 
-.main-content {
-  flex: 1;
-  padding: 2rem;
+.App-link {
+  color: #61dafb;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.App-link:hover {
+  color: #4fa8d3;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) {
+  .main-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .App-logo {
+    height: 30vmin;
+  }
 }
 
 @media (max-width: 768px) {
   .main-content {
     padding: 1rem;
+  }
+  
+  .App-header {
+    font-size: calc(8px + 2vmin);
+  }
+  
+  .App-logo {
+    height: 25vmin;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-content {
+    padding: 0.75rem;
+  }
+  
+  .App-header {
+    padding: 0.5rem;
+  }
+  
+  .App-logo {
+    height: 20vmin;
+  }
+}
+
+/* Touch Target Sizes for Mobile */
+button, .App-link {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Fluid Typography */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* Safe Area Insets for Mobile Devices */
+@supports (padding: max(0px)) {
+  body, .app-container, .App-header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
