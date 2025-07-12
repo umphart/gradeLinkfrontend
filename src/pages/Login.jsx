@@ -28,7 +28,7 @@ const Login = () => {
 
     // Basic validation
     if (!email || !email.includes('@') || !password) {
-      setError('Please enter a valid email and password.');
+      setError('Please enter a valid email and password...');
       return;
     }
 
