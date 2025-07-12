@@ -98,7 +98,7 @@ const Login = () => {
               height: isMobile ? 48 : 56
             }} />
             <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ mt: 1, fontWeight: 'bold' }}>
-              School Admin Login
+              School Admin Login...
             </Typography>
           </Box>
 
