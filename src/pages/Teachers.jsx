@@ -105,24 +105,25 @@ const handleAddTeacher = async () => {
     return;
   }
 
-  const form = new FormData();
+  const formData = new FormData();
   
-  // Append all fields including schoolName
-  form.append('schoolName', schoolData.schoolName);
-  form.append('fullName', newTeacher.full_name);
-  form.append('department', newTeacher.department);
-  form.append('email', newTeacher.email || '');
-  form.append('phone', newTeacher.phone || '');
-  form.append('gender', newTeacher.gender || '');
+  // Append all fields
+  formData.append('schoolName', schoolData.schoolName);
+  formData.append('fullName', newTeacher.full_name);
+  formData.append('department', newTeacher.department);
+  formData.append('email', newTeacher.email || '');
+  formData.append('phone', newTeacher.phone || '');
+  formData.append('gender', newTeacher.gender || '');
 
+  // Only append photo if it exists
   if (newTeacher.photo) {
-    form.append('photo', newTeacher.photo);
+    formData.append('photo', newTeacher.photo);
   }
 
   try {
     const response = await axios.post(
       'https://gradelink.onrender.com/api/teachers/add-teacher',
-      form,
+      formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -146,6 +147,7 @@ const handleAddTeacher = async () => {
   } catch (err) {
     console.error('Full error:', err);
     const errorMessage = err.response?.data?.message || 
+                       err.response?.data?.error || 
                        'Failed to add teacher. Please try again.';
     setSnackbarMessage(errorMessage);
     setSnackbarSeverity('error');
