@@ -14,28 +14,49 @@ export const getTeachers = async () => {
 };
 
 export const addTeacher = async (teacherData) => {
-  const schoolData = JSON.parse(localStorage.getItem('school'));
-  const schoolName = schoolData?.name || '';
-
-  const formData = new FormData();
-  formData.append('schoolName', schoolName);
-  formData.append('fullName', teacherData.full_name);
-  formData.append('department', teacherData.department);
-  formData.append('email', teacherData.email || '');
-  formData.append('phone', teacherData.phone || '');
-  formData.append('gender', teacherData.gender || '');
-  
-  if (teacherData.photo) {
-    formData.append('photo', teacherData.photo);
-  }
-
-  const response = await axios.post(`${API_BASE_URL}/add-teacher`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
+  try {
+    const schoolData = JSON.parse(localStorage.getItem('school'));
+    if (!schoolData?.name) {
+      throw new Error('School information not found');
     }
-  });
-  
-  return response.data;
+
+    const formData = new FormData();
+    formData.append('schoolName', schoolData.name);
+    formData.append('fullName', teacherData.full_name);
+    formData.append('department', teacherData.department);
+    formData.append('email', teacherData.email || '');
+    formData.append('phone', teacherData.phone || '');
+    formData.append('gender', teacherData.gender || '');
+    
+    if (teacherData.photo) {
+      formData.append('photo', teacherData.photo);
+    }
+
+    const response = await axios.post(
+      'https://gradelink.onrender.com/api/teachers/add-teacher', 
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // If using auth
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Detailed error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      request: {
+        method: error.config?.method,
+        url: error.config?.url,
+        data: error.config?.data
+      }
+    });
+    throw error;
+  }
 };
 
 
