@@ -12,16 +12,17 @@ export const getTeachers = async () => {
   });
   return response.data;
 };
-
 export const addTeacher = async (teacherData) => {
   try {
+    // Get school data from localStorage
     const schoolData = JSON.parse(localStorage.getItem('school'));
-    if (!schoolData?.name) {
-      throw new Error('School information not found');
+    if (!schoolData || !schoolData.schoolName) {
+      throw new Error('School information not found in localStorage');
     }
 
+    // Create FormData object
     const formData = new FormData();
-    formData.append('schoolName', schoolData.name);
+    formData.append('schoolName', schoolData.schoolName);
     formData.append('fullName', teacherData.full_name);
     formData.append('department', teacherData.department);
     formData.append('email', teacherData.email || '');
@@ -33,27 +34,22 @@ export const addTeacher = async (teacherData) => {
     }
 
     const response = await axios.post(
-      'https://gradelink.onrender.com/api/teachers/add-teacher', 
+      'https://gradelink.onrender.com/api/teachers/add-teacher',
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // If using auth
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       }
     );
 
     return response.data;
   } catch (error) {
-    console.error('Detailed error:', {
+    console.error('Add teacher error:', {
       message: error.message,
       response: error.response?.data,
-      status: error.response?.status,
-      request: {
-        method: error.config?.method,
-        url: error.config?.url,
-        data: error.config?.data
-      }
+      status: error.response?.status
     });
     throw error;
   }

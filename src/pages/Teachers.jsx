@@ -97,13 +97,23 @@ const Teachers = () => {
 
 const handleAddTeacher = async () => {
   try {
+    // Validate required fields
     if (!newTeacher.full_name || !newTeacher.department) {
       throw new Error('Full name and department are required');
     }
 
     setLoading(true);
+    
+    // Get school data from localStorage
+    const schoolData = JSON.parse(localStorage.getItem('school'));
+    if (!schoolData?.schoolName) {
+      throw new Error('School information not found');
+    }
+
+    // Call the service
     const response = await addTeacher(newTeacher);
 
+    // Show success message
     setSnackbarMessage(
       `Teacher added successfully! ID: ${response.teacher.teacherId}`
     );
@@ -114,20 +124,9 @@ const handleAddTeacher = async () => {
     setTeachers(updatedTeachers);
     handleCloseModal();
   } catch (error) {
-    let errorMessage = 'Failed to add teacher';
-    
-    // More detailed error parsing
-    if (error.response) {
-      errorMessage = error.response.data?.message || 
-                    error.response.data?.error || 
-                    `Server error (${error.response.status})`;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    setSnackbarMessage(errorMessage);
+    setSnackbarMessage(error.message || 'Failed to add teacher');
     setSnackbarSeverity('error');
-    console.error('Full error details:', error);
+    console.error('Error details:', error);
   } finally {
     setLoading(false);
     setOpenSnackbar(true);
