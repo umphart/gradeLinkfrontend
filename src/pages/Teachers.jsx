@@ -96,78 +96,57 @@ const Teachers = () => {
   };
 
 const handleAddTeacher = async () => {
-  // Get school data from localStorage
   const schoolData = JSON.parse(localStorage.getItem('school'));
-  console.log("School Data:", schoolData); // Debug log
   
-  if (!schoolData) {
+  if (!schoolData || !schoolData.schoolName) {
     setSnackbarMessage('School information not found. Please log in again.');
     setSnackbarSeverity('error');
     setOpenSnackbar(true);
     return;
   }
 
-  const schoolName = schoolData.schoolName; // Access schoolName from the object
-  console.log("Using School Name:", schoolName); // Debug log
-
-  if (!newTeacher.full_name || !newTeacher.department) {
-    setSnackbarMessage('Please fill all required fields');
-    setSnackbarSeverity('error');
-    setOpenSnackbar(true);
-    return;
-  }
-
   const form = new FormData();
+  
+  // Append all fields including schoolName
+  form.append('schoolName', schoolData.schoolName);
   form.append('fullName', newTeacher.full_name);
   form.append('department', newTeacher.department);
   form.append('email', newTeacher.email || '');
   form.append('phone', newTeacher.phone || '');
   form.append('gender', newTeacher.gender || '');
-  form.append('schoolName', schoolName); // Use the properly extracted schoolName
 
   if (newTeacher.photo) {
     form.append('photo', newTeacher.photo);
   }
 
-  console.log("FormData contents:");
-  for (let [key, value] of form.entries()) {
-    console.log(`${key} : ${value instanceof File ? `${value.name} (${value.size} bytes)` : value}`);
-  }
-
   try {
-    console.log(`Sending request to: https://gradelink.onrender.com/api/teachers/add-teacher`);
     const response = await axios.post(
-      'https://gradelink.onrender.com/api/teachers/add-teacher', 
-      form, 
+      'https://gradelink.onrender.com/api/teachers/add-teacher',
+      form,
       {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        validateStatus: (status) => status < 500
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       }
     );
 
     if (response.data.success) {
       setSnackbarMessage(
-        `Teacher added successfully! ID: ${response.data.teacher.teacherId}. Password: ${response.data.teacher.password}`
+        `Teacher added successfully! ID: ${response.data.teacher.teacherId}`
       );
       setSnackbarSeverity('success');
-      
-      // Refresh teacher list
       const data = await getTeachers();
       setTeachers(data);
     } else {
       setSnackbarMessage(response.data.message || 'Failed to add teacher');
       setSnackbarSeverity('error');
     }
-    
     setOpenSnackbar(true);
     handleCloseModal();
-
   } catch (err) {
-    console.error('Full error details:', err);
+    console.error('Full error:', err);
     const errorMessage = err.response?.data?.message || 
-                       err.response?.data?.error || 
-                       err.message || 
-                       'Failed to add teacher';
+                       'Failed to add teacher. Please try again.';
     setSnackbarMessage(errorMessage);
     setSnackbarSeverity('error');
     setOpenSnackbar(true);
