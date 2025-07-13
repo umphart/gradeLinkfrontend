@@ -96,8 +96,19 @@ const Teachers = () => {
   };
 
 const handleAddTeacher = async () => {
+  // Get school data from localStorage
   const schoolData = JSON.parse(localStorage.getItem('school'));
-  const schoolName = schoolData?.name || '';
+  console.log("School Data:", schoolData); // Debug log
+  
+  if (!schoolData) {
+    setSnackbarMessage('School information not found. Please log in again.');
+    setSnackbarSeverity('error');
+    setOpenSnackbar(true);
+    return;
+  }
+
+  const schoolName = schoolData.schoolName; // Access schoolName from the object
+  console.log("Using School Name:", schoolName); // Debug log
 
   if (!newTeacher.full_name || !newTeacher.department) {
     setSnackbarMessage('Please fill all required fields');
@@ -107,20 +118,24 @@ const handleAddTeacher = async () => {
   }
 
   const form = new FormData();
-
-  // Match the field names with what the backend expects
   form.append('fullName', newTeacher.full_name);
   form.append('department', newTeacher.department);
   form.append('email', newTeacher.email || '');
   form.append('phone', newTeacher.phone || '');
   form.append('gender', newTeacher.gender || '');
-  form.append('schoolName', schoolName);
+  form.append('schoolName', schoolName); // Use the properly extracted schoolName
 
   if (newTeacher.photo) {
     form.append('photo', newTeacher.photo);
   }
 
+  console.log("FormData contents:");
+  for (let [key, value] of form.entries()) {
+    console.log(`${key} : ${value instanceof File ? `${value.name} (${value.size} bytes)` : value}`);
+  }
+
   try {
+    console.log(`Sending request to: https://gradelink.onrender.com/api/teachers/add-teacher`);
     const response = await axios.post(
       'https://gradelink.onrender.com/api/teachers/add-teacher', 
       form, 
@@ -131,35 +146,28 @@ const handleAddTeacher = async () => {
     );
 
     if (response.data.success) {
-      // Success case - adjust to match backend response structure
       setSnackbarMessage(
-        `Teacher added successfully! ID: ${response.data.teacher.teacherId}. Password: ${response.data.teacher.password} (please change after first login)`
+        `Teacher added successfully! ID: ${response.data.teacher.teacherId}. Password: ${response.data.teacher.password}`
       );
       setSnackbarSeverity('success');
       
-      // Refresh data
+      // Refresh teacher list
       const data = await getTeachers();
       setTeachers(data);
     } else {
-      // Handle other cases
-      setSnackbarMessage(response.data.message || 'Unexpected response');
-      setSnackbarSeverity('warning');
+      setSnackbarMessage(response.data.message || 'Failed to add teacher');
+      setSnackbarSeverity('error');
     }
     
     setOpenSnackbar(true);
     handleCloseModal();
 
   } catch (err) {
+    console.error('Full error details:', err);
     const errorMessage = err.response?.data?.message || 
                        err.response?.data?.error || 
                        err.message || 
                        'Failed to add teacher';
-    console.error('Full error:', {
-      message: err.message,
-      response: err.response?.data,
-      status: err.response?.status,
-      config: err.config
-    });
     setSnackbarMessage(errorMessage);
     setSnackbarSeverity('error');
     setOpenSnackbar(true);
