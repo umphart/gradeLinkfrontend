@@ -96,14 +96,11 @@ const Teachers = () => {
   };
 
 const handleAddTeacher = async () => {
-  if (!newTeacher.full_name || !newTeacher.department) {
-    setSnackbarMessage('Full name and department are required');
-    setSnackbarSeverity('error');
-    setOpenSnackbar(true);
-    return;
-  }
-
   try {
+    if (!newTeacher.full_name || !newTeacher.department) {
+      throw new Error('Full name and department are required');
+    }
+
     setLoading(true);
     const response = await addTeacher(newTeacher);
 
@@ -112,33 +109,30 @@ const handleAddTeacher = async () => {
     );
     setSnackbarSeverity('success');
     
+    // Refresh teacher list
     const updatedTeachers = await getTeachers();
     setTeachers(updatedTeachers);
     handleCloseModal();
   } catch (error) {
     let errorMessage = 'Failed to add teacher';
     
+    // More detailed error parsing
     if (error.response) {
-      // Backend returned an error response
-      errorMessage = error.response.data.message || 
-                    error.response.data.error || 
-                    `Server error: ${error.response.status}`;
-    } else if (error.request) {
-      // Request was made but no response received
-      errorMessage = 'No response from server - check your connection';
-    } else {
-      // Something happened in setting up the request
+      errorMessage = error.response.data?.message || 
+                    error.response.data?.error || 
+                    `Server error (${error.response.status})`;
+    } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     setSnackbarMessage(errorMessage);
     setSnackbarSeverity('error');
+    console.error('Full error details:', error);
   } finally {
     setLoading(false);
     setOpenSnackbar(true);
   }
 };
-
 
 if (loading) {
   return (
