@@ -95,37 +95,49 @@ const Teachers = () => {
     }));
   };
 
- const handleAddTeacher = async () => {
-    if (!newTeacher.full_name || !newTeacher.department) {
-      setSnackbarMessage('Full name and department are required');
-      setSnackbarSeverity('error');
-      setOpenSnackbar(true);
-      return;
-    }
+const handleAddTeacher = async () => {
+  if (!newTeacher.full_name || !newTeacher.department) {
+    setSnackbarMessage('Full name and department are required');
+    setSnackbarSeverity('error');
+    setOpenSnackbar(true);
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const response = await addTeacher(newTeacher);
+  try {
+    setLoading(true);
+    const response = await addTeacher(newTeacher);
 
-      setSnackbarMessage(
-        `Teacher added successfully! ID: ${response.teacher.teacherId}. Password: ${response.teacher.password}`
-      );
-      setSnackbarSeverity('success');
-      
-      // Refresh the teachers list
-      const updatedTeachers = await getTeachers();
-      setTeachers(updatedTeachers);
-      
-      handleCloseModal();
-    } catch (error) {
-      console.error('Error adding teacher:', error);
-      setSnackbarMessage(error.response?.data?.message || 'Failed to add teacher');
-      setSnackbarSeverity('error');
-    } finally {
-      setLoading(false);
-      setOpenSnackbar(true);
+    setSnackbarMessage(
+      `Teacher added successfully! ID: ${response.teacher.teacherId}`
+    );
+    setSnackbarSeverity('success');
+    
+    const updatedTeachers = await getTeachers();
+    setTeachers(updatedTeachers);
+    handleCloseModal();
+  } catch (error) {
+    let errorMessage = 'Failed to add teacher';
+    
+    if (error.response) {
+      // Backend returned an error response
+      errorMessage = error.response.data.message || 
+                    error.response.data.error || 
+                    `Server error: ${error.response.status}`;
+    } else if (error.request) {
+      // Request was made but no response received
+      errorMessage = 'No response from server - check your connection';
+    } else {
+      // Something happened in setting up the request
+      errorMessage = error.message;
     }
-  };
+    
+    setSnackbarMessage(errorMessage);
+    setSnackbarSeverity('error');
+  } finally {
+    setLoading(false);
+    setOpenSnackbar(true);
+  }
+};
 
 
 if (loading) {
