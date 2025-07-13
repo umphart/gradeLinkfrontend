@@ -22,50 +22,53 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { email, password } = formData;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const { email, password } = formData;
 
-    // Basic validation
-    if (!email || !email.includes('@') || !password) {
-      setError('Please enter a valid email and password.');
-      return;
-    }
+  // Basic validation
+  if (!email || !email.includes('@') || !password) {
+    setError('Please enter a valid email and password.');
+    return;
+  }
 
-    try {
-      setError(null);
-      setLoading(true);
+  try {
+    setError(null);
+    setLoading(true);
 
-      const response = await axios.post(
-        'https://gradelink.onrender.com/api/login',
-        { email, password },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
+    const response = await axios.post(
+      'https://gradelink.onrender.com/api/login',
+      { email, password },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
-      );
-      
-      if (response.data.message === 'Login successful') {
-        const { user } = response.data;
-        
-        // For now, store user data directly (add JWT later)
-        localStorage.setItem('admin', JSON.stringify(user));
-        login(user); // Update auth context
-
-        // Redirect after slight delay for better UX
-        setTimeout(() => {
-          navigate('/admin');
-        }, 1000);
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+    );
+    
+    if (response.data.message === 'Login successful') {
+      const { user } = response.data;
+      
+      // Log the school name to console
+      console.log('Logged in to school:', user.schoolName); // Assuming the school name is in user.schoolName
+      
+      // For now, store user data directly (add JWT later)
+      localStorage.setItem('admin', JSON.stringify(user));
+      login(user); // Update auth context
+
+      // Redirect after slight delay for better UX
+      setTimeout(() => {
+        navigate('/admin');
+      }, 1000);
     }
-  };
+  } catch (err) {
+    console.error('Login error:', err);
+    setError(err.response?.data?.message || 'Login failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Box sx={{
