@@ -12,7 +12,7 @@ export const getTeachers = async () => {
       throw new Error('School information not found in localStorage');
     }
 
-    const response = await axios.get(`${API_BASE_URL}/teachers`, {
+    const response = await axios.get(`${API_BASE_URL}/teachers/add-teacher`, {
       params: { 
         schoolName: schoolData.schoolName 
       }

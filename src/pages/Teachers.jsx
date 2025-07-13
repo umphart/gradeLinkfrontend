@@ -120,7 +120,7 @@ const handleAddTeacher = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost:5000/api/teachers/add', form, {
+    const response = await axios.post('https://gradelink.onrender.com/api/teachers/add-teacher', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
       validateStatus: (status) => status < 500 // Don't throw on 4xx errors
     });
