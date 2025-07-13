@@ -25,55 +25,7 @@ export const getTeachers = async () => {
   }
 };
 
-export const addTeacher = async (teacherData) => {
-  try {
-    const schoolData = JSON.parse(localStorage.getItem('school'));
-    
-    if (!schoolData || !schoolData.schoolName) {
-      throw new Error('School information not found in localStorage');
-    }
 
-    const formData = new FormData();
-    formData.append('schoolName', schoolData.schoolName);
-    formData.append('fullName', teacherData.fullName);
-    formData.append('department', teacherData.department);
-    formData.append('email', teacherData.email || '');
-    formData.append('phone', teacherData.phone || '');
-    formData.append('gender', teacherData.gender || '');
-
-    if (teacherData.photo) {
-      formData.append('photo', teacherData.photo);
-    }
-
-    const response = await axios.post(
-      `${API_BASE_URL}/teachers/add-teacher`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error('Error adding teacher:', error);
-    throw error;
-  }
-};
-
-export const updateTeacher = async (id, teacherData) => {
-  try {
-    const response = await axios.patch(
-      `${API_BASE_URL}/teachers/${id}`,
-      teacherData
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error updating teacher:', error);
-    throw error;
-  }
-};
 
 export const deleteTeacher = async (id) => {
   try {
