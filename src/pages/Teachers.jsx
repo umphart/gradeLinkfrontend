@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 
 import TeacherRow from '../components/teachers/TeacherRow';
-import { getTeachers } from '../services/teacherService';
+import { getTeachers, addTeacher } from '../services/teacherService';
 
 const Teachers = () => {
   const [teachers, setTeachers] = useState([]);
@@ -95,69 +95,37 @@ const Teachers = () => {
     }));
   };
 
-const handleAddTeacher = async () => {
-  const schoolData = JSON.parse(localStorage.getItem('school'));
-  const schoolName = schoolData?.name || '';
-
-  if (!newTeacher.full_name || !newTeacher.department) {
-    setSnackbarMessage('Please fill all required fields');
-    setSnackbarSeverity('error');
-    setOpenSnackbar(true);
-    return;
-  }
-
-  const form = new FormData();
-
-  form.append('schoolName', schoolName);
-  form.append('full_name', newTeacher.full_name);
-  form.append('email', newTeacher.email || '');
-  form.append('phone', newTeacher.phone || '');
-  form.append('gender', newTeacher.gender || '');
-  form.append('department', newTeacher.department);
-
-  if (newTeacher.photo) {
-    form.append('photo', newTeacher.photo);
-  }
-
-  try {
-    const response = await axios.post('http://localhost:5000/api/teachers/add', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      validateStatus: (status) => status < 500 // Don't throw on 4xx errors
-    });
-
-    if (response.status === 201) {
-      // Success case
-     setSnackbarMessage(
-  `Teacher added successfully! ID: ${response.data.teacher_id}. Password: ${response.data.password} (please change after first login)`
-);
-      setSnackbarSeverity('success');
-      // Refresh data
-      const data = await getTeachers();
-      setTeachers(data);
-    } else {
-      // Handle other status codes
-      setSnackbarMessage(response.data.message || 'Unexpected response');
-      setSnackbarSeverity('warning');
+ const handleAddTeacher = async () => {
+    if (!newTeacher.full_name || !newTeacher.department) {
+      setSnackbarMessage('Full name and department are required');
+      setSnackbarSeverity('error');
+      setOpenSnackbar(true);
+      return;
     }
-    
-    setOpenSnackbar(true);
-    handleCloseModal();
 
-  } catch (err) {
-    const errorMessage = err.response?.data?.error || 
-                       err.message || 
-                       'Failed to add teacher';
-    console.error('Full error:', {
-      message: err.message,
-      response: err.response?.data,
-      status: err.response?.status,
-      config: err.config
-    });
-    setSnackbarMessage(errorMessage);
-    setSnackbarSeverity('error');
-    setOpenSnackbar(true);
-  }
-};
+    try {
+      setLoading(true);
+      const response = await addTeacher(newTeacher);
+
+      setSnackbarMessage(
+        `Teacher added successfully! ID: ${response.teacher.teacherId}. Password: ${response.teacher.password}`
+      );
+      setSnackbarSeverity('success');
+      
+      // Refresh the teachers list
+      const updatedTeachers = await getTeachers();
+      setTeachers(updatedTeachers);
+      
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error adding teacher:', error);
+      setSnackbarMessage(error.response?.data?.message || 'Failed to add teacher');
+      setSnackbarSeverity('error');
+    } finally {
+      setLoading(false);
+      setOpenSnackbar(true);
+    }
+  };
 
 
 if (loading) {
