@@ -96,52 +96,31 @@ const Teachers = () => {
   };
 
 const handleAddTeacher = async () => {
-  // Get school data from localStorage
   const schoolData = JSON.parse(localStorage.getItem('school'));
   const schoolName = schoolData?.name || '';
-  
-  console.log('School Data from localStorage:', schoolData);
-  console.log('Extracted School Name:', schoolName);
 
-  // Validate required fields
   if (!newTeacher.full_name || !newTeacher.department) {
-    console.error('Validation failed - missing required fields:', {
-      full_name: newTeacher.full_name,
-      department: newTeacher.department
-    });
     setSnackbarMessage('Please fill all required fields');
     setSnackbarSeverity('error');
     setOpenSnackbar(true);
     return;
   }
 
-  // Prepare FormData
   const form = new FormData();
-  form.append('schoolName', schoolName);
-  form.append('fullName', newTeacher.full_name); // Note: Changed to match backend expectation
+
+  // Match the field names with what the backend expects
+  form.append('fullName', newTeacher.full_name);
+  form.append('department', newTeacher.department);
   form.append('email', newTeacher.email || '');
   form.append('phone', newTeacher.phone || '');
   form.append('gender', newTeacher.gender || '');
-  form.append('department', newTeacher.department);
+  form.append('schoolName', schoolName);
 
   if (newTeacher.photo) {
     form.append('photo', newTeacher.photo);
-    console.log('Photo attached:', newTeacher.photo.name, newTeacher.photo.size);
-  }
-
-  // Log FormData contents (needs special handling)
-  console.log('FormData contents:');
-  for (let [key, value] of form.entries()) {
-    if (key === 'photo') {
-      console.log(key, ':', value.name, `(${value.size} bytes)`);
-    } else {
-      console.log(key, ':', value);
-    }
   }
 
   try {
-    console.log('Sending request to:', 'https://gradelink.onrender.com/api/teachers/add-teacher');
-    
     const response = await axios.post(
       'https://gradelink.onrender.com/api/teachers/add-teacher', 
       form, 
@@ -151,15 +130,10 @@ const handleAddTeacher = async () => {
       }
     );
 
-    console.log('Response received:', {
-      status: response.status,
-      data: response.data,
-      headers: response.headers
-    });
-
-    if (response.status === 201) {
+    if (response.data.success) {
+      // Success case - adjust to match backend response structure
       setSnackbarMessage(
-        `Teacher added successfully! ID: ${response.data.teacherId}. Password: ${response.data.password}`
+        `Teacher added successfully! ID: ${response.data.teacher.teacherId}. Password: ${response.data.teacher.password} (please change after first login)`
       );
       setSnackbarSeverity('success');
       
@@ -167,6 +141,7 @@ const handleAddTeacher = async () => {
       const data = await getTeachers();
       setTeachers(data);
     } else {
+      // Handle other cases
       setSnackbarMessage(response.data.message || 'Unexpected response');
       setSnackbarSeverity('warning');
     }
@@ -175,17 +150,16 @@ const handleAddTeacher = async () => {
     handleCloseModal();
 
   } catch (err) {
-    console.error('Full error details:', {
+    const errorMessage = err.response?.data?.message || 
+                       err.response?.data?.error || 
+                       err.message || 
+                       'Failed to add teacher';
+    console.error('Full error:', {
       message: err.message,
       response: err.response?.data,
       status: err.response?.status,
       config: err.config
     });
-
-    const errorMessage = err.response?.data?.error || 
-                       err.message || 
-                       'Failed to add teacher';
-    
     setSnackbarMessage(errorMessage);
     setSnackbarSeverity('error');
     setOpenSnackbar(true);
