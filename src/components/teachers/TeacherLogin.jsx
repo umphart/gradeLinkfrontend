@@ -25,12 +25,12 @@ const TeacherLogin = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   const { teacherId, password } = formData;
 
-  if (!teacherId || !password) {
-    setError('Please enter your ID and password.');
+  if (!teacherId?.trim() || !password?.trim()) {
+    setError('Please enter both ID and password');
     return;
   }
 
@@ -38,34 +38,24 @@ const TeacherLogin = () => {
     setError(null);
     setLoading(true);
     
-    const response = await axios.post('https://gradelink.onrender.com/api/teachers-login', {
-      teacherId,
-      password,
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      withCredentials: true // For secure cookies if using sessions
-    });
+    const response = await axios.post(
+      'https://gradelink.onrender.com/api/teachers-login',
+      { teacherId, password },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
+      }
+    );
 
     if (response.data.success) {
-      // Store minimal required data in localStorage
-      localStorage.setItem('teacherData', JSON.stringify({
-        id: response.data.user.id,
-        teacherId: response.data.user.teacher_id,
-        name: response.data.user.teacher_name,
-        school: response.data.user.schoolName,
-        logo: response.data.user.logo
-      }));
-      
-      // Redirect to dashboard
+      localStorage.setItem('teacher', JSON.stringify(response.data.user));
       window.location.href = '/teacher-dashboard';
     }
   } catch (err) {
-    const errorMessage = err.response?.data?.message || 
-                        err.message || 
-                        'Login failed. Please try again.';
-    setError(errorMessage);
+    const errorMsg = err.response?.data?.message || 
+                    err.message || 
+                    'Login failed. Please try again.';
+    setError(errorMsg);
   } finally {
     setLoading(false);
   }
