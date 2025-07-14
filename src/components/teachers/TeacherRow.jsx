@@ -21,7 +21,7 @@ const TeacherRow = ({ teacher, onSave }) => {
   const [open, setOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    teacher_name: '',
+    full_name: '',
     email: '',
     phone: '',
     department: '',
@@ -32,7 +32,7 @@ const TeacherRow = ({ teacher, onSave }) => {
   React.useEffect(() => {
     if (teacher) {
       setFormData({
-        teacher_name: teacher.teacher_name || '',
+        full_name: teacher.full_name || '',
         email: teacher.email || '',
         phone: teacher.phone || '',
         department: teacher.department || '',
@@ -43,7 +43,7 @@ const TeacherRow = ({ teacher, onSave }) => {
 
   if (!teacher) return null;
 
-  const { id, teacher_id, teacher_name, email, phone, department, gender, photo_url } = teacher;
+  const { id, teacher_id, full_name, email, phone, department, gender, photo_url } = teacher;
 
   const handleOpenModal = (editMode = false) => {
     setIsEditMode(editMode);
@@ -72,7 +72,7 @@ const TeacherRow = ({ teacher, onSave }) => {
     <>
       <TableRow>
         <TableCell>{teacher_id || 'N/A'}</TableCell>
-        <TableCell>{teacher_name}</TableCell>
+        <TableCell>{full_name}</TableCell>
         <TableCell>{email || 'N/A'}</TableCell>
         <TableCell>{phone || 'N/A'}</TableCell>
         <TableCell>{department || 'N/A'}</TableCell>
@@ -91,13 +91,13 @@ const TeacherRow = ({ teacher, onSave }) => {
               <Avatar src={fullPhotoUrl} sx={{ width: 80, height: 80 }} />
             ) : (
               <Avatar sx={{ width: 80, height: 80 }}>
-                {teacher_name ? teacher_name.charAt(0).toUpperCase() : 'T'}
+                {full_name ? full_name.charAt(0).toUpperCase() : 'T'}
               </Avatar>
             )}
 
             {isEditMode ? (
               <>
-                <TextField label="Name" name="teacher_name" value={formData.teacher_name} onChange={handleInputChange} fullWidth />
+                <TextField label="Name" name="full_name" value={formData.full_name} onChange={handleInputChange} fullWidth />
                 <TextField label="Email" name="email" value={formData.email} onChange={handleInputChange} fullWidth />
                 <TextField label="Phone" name="phone" value={formData.phone} onChange={handleInputChange} fullWidth />
                 <TextField label="Department" name="department" value={formData.department} onChange={handleInputChange} fullWidth />
@@ -105,7 +105,7 @@ const TeacherRow = ({ teacher, onSave }) => {
               </>
             ) : (
               <Box width="100%" sx={{ fontSize: '0.875rem' }}>
-                <Box display="flex" py={0.5}><Box width="40%" fontWeight="bold">Name:</Box><Box width="60%">{formData.teacher_name}</Box></Box>
+                <Box display="flex" py={0.5}><Box width="40%" fontWeight="bold">Name:</Box><Box width="60%">{formData.full_name}</Box></Box>
                 <Box display="flex" py={0.5}><Box width="40%" fontWeight="bold">Email:</Box><Box width="60%">{formData.email}</Box></Box>
                 <Box display="flex" py={0.5}><Box width="40%" fontWeight="bold">Phone:</Box><Box width="60%">{formData.phone}</Box></Box>
                 <Box display="flex" py={0.5}><Box width="40%" fontWeight="bold">Department:</Box><Box width="60%">{formData.department}</Box></Box>

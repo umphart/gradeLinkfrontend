@@ -137,14 +137,14 @@ const handleSubmit = async (e) => {
     
     // Append all form data with correct field names
     formData.append('school_name', formData.school_name);
-    formData.append('school_email', formData.school_email.toLowerCase()); // normalize email
+    formData.append('school_email', formData.school_email); 
     formData.append('school_phone', formData.school_phone);
     formData.append('school_address', formData.school_address);
     formData.append('school_city', formData.school_city);
     formData.append('school_state', formData.school_state);
     formData.append('admin_firstName', formData.admin_firstName);
     formData.append('admin_lastName', formData.admin_lastName);
-    formData.append('admin_email', formData.admin_email.toLowerCase()); // normalize email
+    formData.append('admin_email', formData.admin_email); 
     formData.append('admin_phone', formData.admin_phone);
     formData.append('admin_password', formData.admin_password);
     
