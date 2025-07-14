@@ -113,8 +113,13 @@ const Students = () => {
   };
 
   const handleAddStudent = async () => {
-    const schoolData = JSON.parse(localStorage.getItem('school'));
-    const schoolName = schoolData?.name || '';
+const schoolData = JSON.parse(localStorage.getItem('school'));
+const schoolName = schoolData?.schoolName;
+
+console.log("✅ schoolName:", schoolName);
+console.log("🧑‍🎓 student:", newStudent);
+
+
 
     if (!newStudent.fullName || !newStudent.className || !newStudent.gender || !newStudent.section) {
       setSnackbarMessage('Please fill all required fields: Full Name, Class, Gender, and Section');
@@ -125,7 +130,8 @@ const Students = () => {
 
     const form = new FormData();
     form.append('schoolName', schoolName);
-    form.append('section', newStudent.section);
+    form.append('section', newStudent.section?.toLowerCase());
+
     form.append('student', JSON.stringify({
       full_name: newStudent.fullName,
       class_name: newStudent.className,
@@ -142,6 +148,9 @@ const Students = () => {
 
     setRegistering(true);
     try {
+      for (let pair of form.entries()) {
+  console.log(pair[0], pair[1]);
+}
       const response = await addStudent(form);
      setSnackbarMessage(
   `Student added successfully! Admission Number: ${response.data.admissionNumber}. ` +

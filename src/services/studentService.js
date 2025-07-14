@@ -5,10 +5,11 @@ import axios from 'axios';
 export const getStudents = async () => {
   try {
     const school = JSON.parse(localStorage.getItem('school'));
-    const schoolName = school?.name;
+   const schoolName = school?.schoolName;
+
     //console.log('Fetching students for:', schoolName);
 
-    const response = await axios.get('http://localhost:5000/api/students/students', {
+    const response = await axios.get('http://localhost:5000/api/students', {
       params: { schoolName }
     });
 
