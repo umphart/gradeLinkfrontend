@@ -25,7 +25,7 @@ const TeacherLogin = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   const { teacherId, password } = formData;
 
@@ -37,25 +37,43 @@ const TeacherLogin = () => {
   try {
     setError(null);
     setLoading(true);
-    const response = await axios.post('https://gradelink.onrender.com/api/teachers-login', {
-      teacherId,
-      password,
-    });
+    
+    const response = await axios.post(
+      'https://gradelink.onrender.com/api/teachers-login', 
+      {
+        teacherId,
+        password,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        withCredentials: true // if cookies/sessions are used
+      }
+    );
 
     if (response.status === 200) {
       const user = response.data.user;
       localStorage.setItem('user', JSON.stringify(user));
-
-      // Force full page reload to ensure related records are freshly fetched
       window.location.href = '/teacher-dashboard';
     }
   } catch (err) {
     console.error('Login error:', err);
-    setError(err.response?.data?.message || 'Login failed. Please try again.');
+    let errorMessage = 'Login failed. Please try again.';
+    
+    if (err.response) {
+      // Server responded with a status other than 2xx
+      errorMessage = err.response.data?.message || errorMessage;
+    } else if (err.request) {
+      // Request was made but no response received
+      errorMessage = 'Network error. Please check your connection.';
+    }
+    
+    setError(errorMessage);
     setLoading(false);
   }
 };
-
   return (
     <Box sx={{
       minHeight: '100vh',
