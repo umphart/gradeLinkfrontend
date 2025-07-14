@@ -25,7 +25,7 @@ const TeacherLogin = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
   e.preventDefault();
   const { teacherId, password } = formData;
 
@@ -37,21 +37,36 @@ const TeacherLogin = () => {
   try {
     setError(null);
     setLoading(true);
-    const response = await axios.post('http://localhost:5000/api/teachersLogin', {
+    
+    const response = await axios.post('https://gradelink.onrender.com/api/teachers-login', {
       teacherId,
       password,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true // For secure cookies if using sessions
     });
 
-    if (response.status === 200) {
-      const user = response.data.user;
-      localStorage.setItem('user', JSON.stringify(user));
-
-      // Force full page reload to ensure related records are freshly fetched
+    if (response.data.success) {
+      // Store minimal required data in localStorage
+      localStorage.setItem('teacherData', JSON.stringify({
+        id: response.data.user.id,
+        teacherId: response.data.user.teacher_id,
+        name: response.data.user.teacher_name,
+        school: response.data.user.schoolName,
+        logo: response.data.user.logo
+      }));
+      
+      // Redirect to dashboard
       window.location.href = '/teacher-dashboard';
     }
   } catch (err) {
-    console.error('Login error:', err);
-    setError(err.response?.data?.message || 'Login failed. Please try again.');
+    const errorMessage = err.response?.data?.message || 
+                        err.message || 
+                        'Login failed. Please try again.';
+    setError(errorMessage);
+  } finally {
     setLoading(false);
   }
 };
