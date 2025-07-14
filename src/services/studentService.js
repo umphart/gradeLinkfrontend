@@ -1,25 +1,43 @@
-//src/sevices/studentService.js
 import axios from 'axios';
 
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export const getStudents = async () => {
   try {
-    const school = JSON.parse(localStorage.getItem('school'));
-   const schoolName = school?.schoolName;
+    const schoolData = JSON.parse(localStorage.getItem('admin')) || 
+                      JSON.parse(localStorage.getItem('user'));
+    const schoolName = schoolData?.schoolName;
 
-    //console.log('Fetching students for:', schoolName);
+    if (!schoolName) {
+      throw new Error('School name not found in localStorage');
+    }
 
-    const response = await axios.get('http://localhost:5000/api/students', {
+    const response = await axios.get(`${API_BASE_URL}/students`, {
       params: { schoolName }
     });
 
     const { primary = [], junior = [], senior = [] } = response.data.students;
-    const students = [...primary, ...junior, ...senior];
-
-  
-    return students;
+    return [...primary, ...junior, ...senior];
   } catch (error) {
     console.error('Failed to fetch students:', error);
+    throw error;
+  }
+};
+
+export const addStudent = async (formData) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/students/add-student`, 
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error('Failed to add student:', error);
     throw error;
   }
 };
@@ -41,31 +59,6 @@ export const getUpcomingTasks = async (id) => {
 export const getAllStudents = async () => {
 };
 
-export const addStudent = async (formData) => {
-  const config = {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-    },
-    transformRequest: (data) => data, 
-  };
 
-  try {
-    const response = await axios.post(
-      'http://localhost:5000/api/students/add-student', 
-      formData, 
-      config
-    );
-    return response;
-  } catch (error) {
-    // Enhance error information
-    if (error.response) {
-      error.message = error.response.data.message || 
-                     error.response.data.error || 
-                     error.message;
-    }
-    throw error;
-  }
-};
 export const getStudentsByClass = async () => {
 };

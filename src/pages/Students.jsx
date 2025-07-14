@@ -113,13 +113,12 @@ const Students = () => {
   };
 
   const handleAddStudent = async () => {
-const schoolData = JSON.parse(localStorage.getItem('school'));
+
+// OR
+const schoolData = JSON.parse(localStorage.getItem('user'));
+
 const schoolName = schoolData?.schoolName;
-
-console.log("✅ schoolName:", schoolName);
-console.log("🧑‍🎓 student:", newStudent);
-
-
+console.log("Correct schoolName:", schoolName); // Should now show "BRITSH COLLAGE"
 
     if (!newStudent.fullName || !newStudent.className || !newStudent.gender || !newStudent.section) {
       setSnackbarMessage('Please fill all required fields: Full Name, Class, Gender, and Section');
