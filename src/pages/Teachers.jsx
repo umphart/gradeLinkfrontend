@@ -101,7 +101,9 @@ const Teachers = () => {
 
 const handleAddTeacher = async () => {
   try {
-    // Get school information
+    setLoading(true);
+    
+    // Get school information with proper error handling
     const adminData = JSON.parse(localStorage.getItem('admin') || '{}');
     const schoolData = JSON.parse(localStorage.getItem('school') || '{}');
     
@@ -111,7 +113,7 @@ const handleAddTeacher = async () => {
                     schoolData.id || schoolData.schoolId;
 
     if (!schoolName) {
-      throw new Error('School information not found in localStorage');
+      throw new Error('School information not found. Please login again.');
     }
 
     // Validate required fields
@@ -136,9 +138,10 @@ const handleAddTeacher = async () => {
       formData.append('photo', newTeacher.photo);
     }
 
-    setLoading(true);
+    // Add teacher
     const response = await addTeacher(formData);
 
+    // Show success message
     setSnackbarMessage(
       `Teacher added successfully! ID: ${response.teacher.teacherId}. ` +
       `Temporary password: ${response.teacher.password}`
@@ -146,23 +149,21 @@ const handleAddTeacher = async () => {
     setSnackbarSeverity('success');
     
     // Refresh teacher list
-    const data = await getTeachers();
-    setTeachers(data);
+    const teachers = await getTeachers();
+    setTeachers(teachers);
     
-  } catch (error) {
-    let errorMessage = error.message;
-    
-    if (error.response) {
-      if (error.response.status === 400) {
-        errorMessage = 'Validation error: ' + (error.response.data.message || 'Invalid data');
-      } else if (error.response.status === 409) {
-        errorMessage = 'Teacher already exists: ' + error.response.data.message;
-      } else {
-        errorMessage = `Server error: ${error.response.data.message || 'Unknown error'}`;
-      }
-    }
+    // Reset form
+    setNewTeacher({
+      full_name: '',
+      email: '',
+      phone: '',
+      gender: '',
+      department: '',
+      photo: null,
+    });
 
-    setSnackbarMessage(errorMessage);
+  } catch (error) {
+    setSnackbarMessage(error.message);
     setSnackbarSeverity('error');
     console.error('Add teacher error:', error);
   } finally {
