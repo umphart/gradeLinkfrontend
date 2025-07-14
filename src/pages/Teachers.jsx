@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 
 import TeacherRow from '../components/teachers/TeacherRow';
-import { getTeachers } from '../services/teacherService';
+import { getTeachers, addTeacher } from '../services/teacherService';
 
 const Teachers = () => {
   const [teachers, setTeachers] = useState([]);
