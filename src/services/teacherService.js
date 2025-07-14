@@ -1,30 +1,56 @@
 import axios from 'axios';
 
-// Set the base URL for your API
-const API_BASE_URL = 'https://gradelink.onrender.com/api'; // or your localhost during development
+const API_BASE_URL = 'https://gradelink.onrender.com/api';
 
 export const getTeachers = async () => {
   try {
-    // Get school data from localStorage
-    const schoolData = JSON.parse(localStorage.getItem('school'));
+    // Try multiple possible locations for school data
+    const adminData = JSON.parse(localStorage.getItem('admin') || '{}');
+    const schoolData = JSON.parse(localStorage.getItem('school') || '{}');
     
-    if (!schoolData || !schoolData.schoolName) {
+    // Determine the school name from either location
+    const schoolName = adminData.schoolName || adminData.school || 
+                      schoolData.schoolName || schoolData.school;
+
+    if (!schoolName) {
       throw new Error('School information not found in localStorage');
     }
 
-    const response = await axios.get(`${API_BASE_URL}/teachers/add-teacher`, {
+    const response = await axios.get(`${API_BASE_URL}/teachers`, {
       params: { 
-        schoolName: schoolData.schoolName 
+        schoolName: schoolName 
+      },
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     });
 
     return response.data;
   } catch (error) {
     console.error('Error fetching teachers:', error);
-    throw error; // Re-throw to handle in components
+    throw error;
   }
 };
 
+export const addTeacher = async (teacherData) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/teachers/add-teacher`,
+      teacherData,
+      {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        timeout: 10000
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error adding teacher:', error);
+    throw error;
+  }
+};
 
 
 export const deleteTeacher = async (id) => {

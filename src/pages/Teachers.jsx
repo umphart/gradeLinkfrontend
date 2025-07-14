@@ -100,124 +100,71 @@ const Teachers = () => {
   };
 
 const handleAddTeacher = async () => {
-  // 1. Enhanced school data retrieval
-  const getSchoolInfo = () => {
-    try {
-      // Check multiple possible storage locations
-      const adminData = JSON.parse(localStorage.getItem('admin') || '{}');
-      const schoolData = JSON.parse(localStorage.getItem('school') || '{}');
-      
-      // Return whichever contains school information
-      return adminData.school || adminData.schoolName || schoolData.school || schoolData.schoolName 
-        ? { ...adminData, ...schoolData }
-        : null;
-    } catch (err) {
-      console.error('Error parsing school data:', err);
-      return null;
-    }
-  };
-
-  // 2. Get school information with fallbacks
-  const schoolInfo = getSchoolInfo();
-  console.log('School information:', schoolInfo);
-  
-  if (!schoolInfo) {
-    setSnackbarMessage('School information not found. Please login again.');
-    setSnackbarSeverity('error');
-    setOpenSnackbar(true);
-    return;
-  }
-
-  const schoolName = schoolInfo.schoolName || schoolInfo.school || 'Unknown School';
-  const schoolId = schoolInfo.id || schoolInfo.schoolId;
-  console.log(`Adding teacher to: ${schoolName} (ID: ${schoolId || 'N/A'})`);
-
-  // 3. Validate required fields
-  if (!newTeacher.full_name || !newTeacher.department) {
-    setSnackbarMessage('Please fill all required fields (Name and Department)');
-    setSnackbarSeverity('error');
-    setOpenSnackbar(true);
-    return;
-  }
-
-  // 4. Prepare form data with school information
-  const form = new FormData();
-  form.append('schoolName', schoolName);
-  if (schoolId) form.append('schoolId', schoolId);
-  form.append('full_name', newTeacher.full_name.trim());
-  form.append('email', newTeacher.email?.trim() || '');
-  form.append('phone', newTeacher.phone?.trim() || '');
-  form.append('gender', newTeacher.gender || '');
-  form.append('department', newTeacher.department.trim());
-
-  if (newTeacher.photo) {
-    if (newTeacher.photo.size > 2 * 1024 * 1024) { // 2MB limit
-      setSnackbarMessage('Photo size must be less than 2MB');
-      setSnackbarSeverity('error');
-      setOpenSnackbar(true);
-      return;
-    }
-    form.append('photo', newTeacher.photo);
-  }
-
-  // 5. Enhanced FormData logging
-  console.log('Submitting teacher data:');
-  const formDataObj = {};
-  for (let [key, value] of form.entries()) {
-    if (key === 'photo') {
-      console.log(`photo: ${value.name} (${value.size} bytes)`);
-      formDataObj[key] = `${value.name} (${value.size} bytes)`;
-    } else {
-      console.log(`${key}: ${value}`);
-      formDataObj[key] = value;
-    }
-  }
-  console.log('Complete form data:', formDataObj);
-
-  // 6. Submit with enhanced error handling
   try {
-    setLoading(true);
-    const response = await axios.post('https://gradelink.onrender.com/api/teachers/add-teacher', form, {
-      headers: { 
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // Add if using auth
-      },
-      timeout: 10000, // 10 second timeout
-      validateStatus: (status) => status < 500
-    });
-
-    if (response.status === 201) {
-      setSnackbarMessage(
-        `Teacher added to ${schoolName} successfully! ID: ${response.data.teacher_id}. Temporary password: ${response.data.password}`
-      );
-      setSnackbarSeverity('success');
-      
-      // Refresh teacher list with loading state
-      const data = await getTeachers();
-      setTeachers(data);
-    } else {
-      setSnackbarMessage(response.data.message || 'Unexpected response from server');
-      setSnackbarSeverity('warning');
-    }
-  } catch (err) {
-    let errorMessage = 'Failed to add teacher';
-    if (err.response) {
-      errorMessage = err.response.data?.error || err.response.data?.message || JSON.stringify(err.response.data);
-      console.error('Server error:', {
-        status: err.response.status,
-        data: err.response.data,
-        headers: err.response.headers
-      });
-    } else if (err.request) {
-      errorMessage = 'No response from server';
-      console.error('No response:', err.request);
-    } else {
-      errorMessage = err.message;
-      console.error('Request error:', err.message);
-    }
+    // Get school information
+    const adminData = JSON.parse(localStorage.getItem('admin') || '{}');
+    const schoolData = JSON.parse(localStorage.getItem('school') || '{}');
     
+    const schoolName = adminData.schoolName || adminData.school || 
+                      schoolData.schoolName || schoolData.school;
+    const schoolId = adminData.id || adminData.schoolId || 
+                    schoolData.id || schoolData.schoolId;
+
+    if (!schoolName) {
+      throw new Error('School information not found in localStorage');
+    }
+
+    // Validate required fields
+    if (!newTeacher.full_name || !newTeacher.department) {
+      throw new Error('Please fill all required fields (Name and Department)');
+    }
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append('schoolName', schoolName);
+    if (schoolId) formData.append('schoolId', schoolId);
+    formData.append('full_name', newTeacher.full_name.trim());
+    formData.append('email', newTeacher.email?.trim() || '');
+    formData.append('phone', newTeacher.phone?.trim() || '');
+    formData.append('gender', newTeacher.gender || '');
+    formData.append('department', newTeacher.department.trim());
+
+    if (newTeacher.photo) {
+      if (newTeacher.photo.size > 2 * 1024 * 1024) {
+        throw new Error('Photo size must be less than 2MB');
+      }
+      formData.append('photo', newTeacher.photo);
+    }
+
+    setLoading(true);
+    const response = await addTeacher(formData);
+
+    setSnackbarMessage(
+      `Teacher added successfully! ID: ${response.teacher.teacherId}. ` +
+      `Temporary password: ${response.teacher.password}`
+    );
+    setSnackbarSeverity('success');
+    
+    // Refresh teacher list
+    const data = await getTeachers();
+    setTeachers(data);
+    
+  } catch (error) {
+    let errorMessage = error.message;
+    
+    if (error.response) {
+      if (error.response.status === 400) {
+        errorMessage = 'Validation error: ' + (error.response.data.message || 'Invalid data');
+      } else if (error.response.status === 409) {
+        errorMessage = 'Teacher already exists: ' + error.response.data.message;
+      } else {
+        errorMessage = `Server error: ${error.response.data.message || 'Unknown error'}`;
+      }
+    }
+
     setSnackbarMessage(errorMessage);
     setSnackbarSeverity('error');
+    console.error('Add teacher error:', error);
   } finally {
     setLoading(false);
     setOpenSnackbar(true);
