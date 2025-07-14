@@ -133,29 +133,27 @@ const handleSubmit = async (e) => {
     setLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    
-    // Append all form data with correct field names
-    formData.append('school_name', formData.school_name);
-    formData.append('school_email', formData.school_email); 
-    formData.append('school_phone', formData.school_phone);
-    formData.append('school_address', formData.school_address);
-    formData.append('school_city', formData.school_city);
-    formData.append('school_state', formData.school_state);
-    formData.append('admin_firstName', formData.admin_firstName);
-    formData.append('admin_lastName', formData.admin_lastName);
-    formData.append('admin_email', formData.admin_email); 
-    formData.append('admin_phone', formData.admin_phone);
-    formData.append('admin_password', formData.admin_password);
-    
+    const payload = new FormData();
+
+    payload.append('school_name', formData.school_name);
+    payload.append('school_email', formData.school_email.toLowerCase());
+    payload.append('school_phone', formData.school_phone);
+    payload.append('school_address', formData.school_address);
+    payload.append('school_city', formData.school_city);
+    payload.append('school_state', formData.school_state);
+    payload.append('admin_firstName', formData.admin_firstName);
+    payload.append('admin_lastName', formData.admin_lastName);
+    payload.append('admin_email', formData.admin_email.toLowerCase());
+    payload.append('admin_phone', formData.admin_phone);
+    payload.append('admin_password', formData.admin_password);
+
     if (formData.school_logo) {
-      formData.append('school_logo', formData.school_logo);
+      payload.append('school_logo', formData.school_logo);
     }
 
     const response = await fetch('https://gradelink.onrender.com/api/schools/register', {
       method: 'POST',
-      body: formData,
-      // Don't set Content-Type header - let the browser set it with boundary
+      body: payload,
     });
 
     const data = await response.json();
@@ -172,6 +170,7 @@ const handleSubmit = async (e) => {
     setLoading(false);
   }
 };
+
   if (loading) {
     return (
       <Container maxWidth="sm" sx={{ 
