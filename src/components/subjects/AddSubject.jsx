@@ -13,6 +13,7 @@ import {
 import axios from 'axios';
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from "react-router-dom";
+
 const AddSubject = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -25,76 +26,71 @@ const AddSubject = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [snackbarMsg, setSnackbarMsg] = useState('');
-
-  const schoolData = JSON.parse(localStorage.getItem('admin'));
-  const schoolName = schoolData?.name || '';
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    // Get school data from localStorage
-    const schoolData = JSON.parse(localStorage.getItem('admin'));
-    const schoolName = schoolData?.schoolName || schoolData?.name || '';
-    
-    console.log('School data from localStorage:', schoolData);
-    console.log('School name being used:', schoolName);
-    console.log('Form data being submitted:', {
-      subject_name: form.subject_name,
-      subject_code: form.subject_code,
-      classname: form.classname,
-      description: form.description
-    });
-
-    if (!schoolName) {
-      throw new Error('School name not found in localStorage');
-    }
-
-    const response = await axios.post('https://gradelink.onrender.com/api/subjects/add', {
-      schoolName,
-      subject_name: form.subject_name,
-      description: form.description,
-      subject_code: form.subject_code,
-      classname: form.classname,
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
+    try {
+      const schoolData = JSON.parse(localStorage.getItem('admin'));
+      const schoolName = schoolData?.schoolName || schoolData?.name || '';
+      
+      if (!schoolName) {
+        throw new Error('School information not found');
       }
-    });
 
-    // Reset form and show success
-    setForm({
-      subject_name: '',
-      description: '',
-      subject_code: '',
-      classname: '',
-    });
+      const response = await axios.post(
+        'https://gradelink.onrender.com/api/subjects/add', 
+        {
+          schoolName,
+          subject_name: form.subject_name,
+          description: form.description,
+          subject_code: form.subject_code,
+          classname: form.classname,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Add if using auth
+          }
+        }
+      );
 
-    setSnackbarMsg(response.data.message || 'Subject added successfully');
-    setSnackbarSeverity('success');
-    setSnackbarOpen(true);
-  } catch (err) {
-    console.error('Error details:', {
-      message: err.message,
-      response: err.response?.data,
-      config: err.config
-    });
-    setSnackbarMsg(err.response?.data?.message || err.message || 'Failed to add subject');
-    setSnackbarSeverity('error');
-    setSnackbarOpen(true);
-  }
-};
+      // Reset form on success
+      setForm({
+        subject_name: '',
+        description: '',
+        subject_code: '',
+        classname: '',
+      });
+
+      setSnackbarMsg(response.data.message || 'Subject added successfully');
+      setSnackbarSeverity('success');
+    } catch (err) {
+      console.error('Submission error:', err);
+      setSnackbarMsg(
+        err.response?.data?.message || 
+        err.message || 
+        'Failed to add subject. Please try again.'
+      );
+      setSnackbarSeverity('error');
+    } finally {
+      setIsSubmitting(false);
+      setSnackbarOpen(true);
+    }
+  };
 
   return (
     <Box sx={{ p: 0, maxWidth: 1300, mx: 'auto' }}>
-          
-  <IconButton onClick={() => navigate(-1)} sx={{ mb: 0 }}>
-  <ArrowBack />
-</IconButton>
+      <IconButton onClick={() => navigate(-1)} sx={{ mb: 0 }}>
+        <ArrowBack />
+      </IconButton>
+      
       <Paper elevation={3} sx={{ p: 3 }}>
         <Typography variant="h5" gutterBottom>
           Add Subject
@@ -102,7 +98,7 @@ const AddSubject = () => {
 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={2.4}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Subject Name"
@@ -110,10 +106,11 @@ const AddSubject = () => {
                 value={form.subject_name}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2.4}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Subject Code"
@@ -121,10 +118,11 @@ const AddSubject = () => {
                 value={form.subject_code}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2.4}>
+            <Grid item xs={12} sm={6} md={3}>
               <TextField
                 fullWidth
                 label="Class Name"
@@ -132,6 +130,7 @@ const AddSubject = () => {
                 value={form.classname}
                 onChange={handleChange}
                 required
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -144,28 +143,29 @@ const AddSubject = () => {
                 onChange={handleChange}
                 multiline
                 rows={1}
+                disabled={isSubmitting}
               />
             </Grid>
 
-            <Grid item xs={12} sm={12} md={1.8}>
+            <Grid item xs={12}>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
                 fullWidth
-                sx={{ height: '56px' }}
+                sx={{ height: '56px', mt: 2 }}
+                disabled={isSubmitting}
               >
-                Add
+                {isSubmitting ? 'Adding...' : 'Add Subject'}
               </Button>
             </Grid>
           </Grid>
         </form>
       </Paper>
 
-      {/* Snackbar for feedback */}
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={2000}
+        autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >

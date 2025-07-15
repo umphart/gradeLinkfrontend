@@ -101,7 +101,7 @@ const Reports = () => {
 
     const fetchStudents = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/students?schoolName=${encodeURIComponent(schoolName)}`);
+        const res = await axios.get(`https://gradelink.onrender.com/api/students?schoolName=${encodeURIComponent(schoolName)}`);
         const data = res.data.students;
 
         const grouped = {};
@@ -135,7 +135,7 @@ const Reports = () => {
     setExamLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/students/get-exam-records?schoolName=${encodeURIComponent(schoolName)}&className=${encodeURIComponent(selectedStudent.class_name)}&admissionNumber=${encodeURIComponent(selectedStudent.admission_number)}&sessionName=${encodeURIComponent(session)}&termName=${encodeURIComponent(term)}`
+        `https://gradelink.onrender.com/api/students/get-exam-records?schoolName=${encodeURIComponent(schoolName)}&className=${encodeURIComponent(selectedStudent.class_name)}&admissionNumber=${encodeURIComponent(selectedStudent.admission_number)}&sessionName=${encodeURIComponent(session)}&termName=${encodeURIComponent(term)}`
       );
       setExamResults(res.data.examRecords || []);
     } catch (err) {
@@ -156,7 +156,7 @@ const Reports = () => {
 
     try {
       const [subjectRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/subjects/all?schoolName=${encodeURIComponent(schoolName)}`),
+        axios.get(`https://gradelink.onrender.com//subjects/all?schoolName=${encodeURIComponent(schoolName)}`),
         fetchExamRecords(examForm.term, examForm.session)
       ]);
       setSubjects(subjectRes.data.subjects || []);
@@ -209,7 +209,7 @@ const Reports = () => {
     try {
       if (editingExam) {
         // Update existing exam record
-        await axios.put('http://localhost:5000/api/students/update-exam-score', {
+        await axios.put('https://gradelink.onrender.com/api/students/update-exam-score', {
           schoolName,
           className: selectedStudent.class_name,
           admissionNumber: selectedStudent.admission_number,
@@ -229,7 +229,7 @@ const Reports = () => {
         ]);
       } else {
         // Add new exam record
-        const res = await axios.post('http://localhost:5000/api/students/add-exam-score', {
+        const res = await axios.post('https://gradelink.onrender.com/api/students/add-exam-score', {
           schoolName,
           className: selectedStudent.class_name,
           examData: [examData],
