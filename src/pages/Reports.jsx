@@ -156,7 +156,7 @@ const Reports = () => {
 
     try {
       const [subjectRes] = await Promise.all([
-        axios.get(`https://gradelink.onrender.com/subjects/all?schoolName=${encodeURIComponent(schoolName)}`),
+        axios.get(`https://gradelink.onrender.com/api/subjects/all?schoolName=${encodeURIComponent(schoolName)}`),
         fetchExamRecords(examForm.term, examForm.session)
       ]);
       setSubjects(subjectRes.data.subjects || []);
