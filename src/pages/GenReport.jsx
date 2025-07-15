@@ -62,7 +62,7 @@ const GenReport = () => {
     const schoolData = JSON.parse(localStorage.getItem('school')) || {};
     setSchool({
       name: schoolData.name || 'GradeLink365  🎓',
-      logo: schoolData.logo ? `http://localhost:5000/uploads/logos/${schoolData.logo}` : ''
+      logo: schoolData.logo ? `https://gradelink.onrender.com/uploads/logos/${schoolData.logo}` : ''
     });
   }, []);
 
@@ -72,7 +72,7 @@ const GenReport = () => {
 
       setLoading(true); // Start loading
       try {
-        const res = await axios.get(`http://localhost:5000/api/students/get-exam-records`, {
+        const res = await axios.get(`https://gradelink.onrender.com/api/students/get-exam-records`, {
           params: {
             schoolName: school.name,
             className: selectedClass,

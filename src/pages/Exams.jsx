@@ -117,7 +117,7 @@ const Exams = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/students/all-exam-records?schoolName=${encodeURIComponent(schoolName)}`
+          `https://gradelink.onrender.com/api/students/all-exam-records?schoolName=${encodeURIComponent(schoolName)}`
         );
 
         if (!response.data?.success) {

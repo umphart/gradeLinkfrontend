@@ -38,7 +38,7 @@ const handleSubmit = async (e) => {
     setError(null);
     setLoading(true);
 
-    const response = await axios.post('http://localhost:5000/api/studentsLogin', {
+    const response = await axios.post('https://gradelink.onrender.com/api/students-login', {
       admissionNumber,
       password,
     });

@@ -41,10 +41,10 @@ const AllStudents = () => {
   };
 
   useEffect(() => {
-    const schoolData = JSON.parse(localStorage.getItem('school')) || {};
+    const schoolData = JSON.parse(localStorage.getItem('admin')) || {};
     setSchool({
-      name: schoolData.name || 'GradeLink365  🎓',
-      logo: schoolData.logo ? `http://localhost:5000/uploads/logos/${schoolData.logo}` : ''
+      name: schoolData.schoolName || 'GradeLink365  🎓',
+      logo: schoolData.logo ? `https://gradelink.onrender.com/uploads/logos/${schoolData.logo}` : ''
     });
   }, []);
 
@@ -57,7 +57,7 @@ const AllStudents = () => {
     const fetchStudents = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`http://localhost:5000/api/students/students?schoolName=${encodeURIComponent(school.name)}`);
+        const res = await axios.get(`https://gradelink.onrender.com/api/students?schoolName=${encodeURIComponent(school.name)}`);
         const data = res.data.students;
 
         const grouped = {};

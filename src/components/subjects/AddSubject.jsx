@@ -26,7 +26,7 @@ const AddSubject = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [snackbarMsg, setSnackbarMsg] = useState('');
 
-  const schoolData = JSON.parse(localStorage.getItem('school'));
+  const schoolData = JSON.parse(localStorage.getItem('admin'));
   const schoolName = schoolData?.name || '';
 
   const handleChange = (e) => {
@@ -34,34 +34,60 @@ const AddSubject = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await axios.post('http://localhost:5000/api/subjects/add', {
-        schoolName,
-        subject_name: form.subject_name,
-        description: form.description,
-        subject_code: form.subject_code,
-        classname: form.classname,
-      });
+  try {
+    // Get school data from localStorage
+    const schoolData = JSON.parse(localStorage.getItem('admin'));
+    const schoolName = schoolData?.schoolName || schoolData?.name || '';
+    
+    console.log('School data from localStorage:', schoolData);
+    console.log('School name being used:', schoolName);
+    console.log('Form data being submitted:', {
+      subject_name: form.subject_name,
+      subject_code: form.subject_code,
+      classname: form.classname,
+      description: form.description
+    });
 
-      setForm({
-        subject_name: '',
-        description: '',
-        subject_code: '',
-        classname: '',
-      });
-
-      setSnackbarMsg(response.data.message || 'Subject added successfully');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-    } catch (err) {
-      console.error('Error adding subject:', err);
-      setSnackbarMsg(err.response?.data?.message || 'Failed to add subject');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+    if (!schoolName) {
+      throw new Error('School name not found in localStorage');
     }
-  };
+
+    const response = await axios.post('https://gradelink.onrender.com/api/subjects/add', {
+      schoolName,
+      subject_name: form.subject_name,
+      description: form.description,
+      subject_code: form.subject_code,
+      classname: form.classname,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    // Reset form and show success
+    setForm({
+      subject_name: '',
+      description: '',
+      subject_code: '',
+      classname: '',
+    });
+
+    setSnackbarMsg(response.data.message || 'Subject added successfully');
+    setSnackbarSeverity('success');
+    setSnackbarOpen(true);
+  } catch (err) {
+    console.error('Error details:', {
+      message: err.message,
+      response: err.response?.data,
+      config: err.config
+    });
+    setSnackbarMsg(err.response?.data?.message || err.message || 'Failed to add subject');
+    setSnackbarSeverity('error');
+    setSnackbarOpen(true);
+  }
+};
 
   return (
     <Box sx={{ p: 0, maxWidth: 1300, mx: 'auto' }}>

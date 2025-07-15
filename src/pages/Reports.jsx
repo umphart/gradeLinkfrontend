@@ -101,7 +101,7 @@ const Reports = () => {
 
     const fetchStudents = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/students/students?schoolName=${encodeURIComponent(schoolName)}`);
+        const res = await axios.get(`http://localhost:5000/api/students?schoolName=${encodeURIComponent(schoolName)}`);
         const data = res.data.students;
 
         const grouped = {};

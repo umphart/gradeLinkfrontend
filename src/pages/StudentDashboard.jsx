@@ -139,7 +139,7 @@ const StudentDashboard = () => {
             {user?.logo && (
               <Box
                 component="img"
-                src={`http://localhost:5000/uploads/logos/${user.logo}`}
+                src={`https://gradelink.onrender.com/uploads/logos/${user.logo}`}
                 alt="School Logo"
                 sx={{
                   width: 60,
