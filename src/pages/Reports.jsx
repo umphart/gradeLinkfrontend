@@ -155,10 +155,15 @@ const Reports = () => {
     setModalOpen(true);
 
     try {
-      const [subjectRes] = await Promise.all([
-        axios.get(`https://gradelink.onrender.com/api/subjects/all?schoolName=${encodeURIComponent(schoolName)}`),
-        fetchExamRecords(examForm.term, examForm.session)
-      ]);
+ const [subjectRes] = await Promise.all([
+  axios.get(`https://gradelink.onrender.com/api/subjects/all?schoolName=${encodeURIComponent(schoolName)}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  }),
+  fetchExamRecords(examForm.term, examForm.session)
+]);
+
       setSubjects(subjectRes.data.subjects || []);
     } catch (err) {
       console.error('Error fetching exam data:', err);
