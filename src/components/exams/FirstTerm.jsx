@@ -44,36 +44,55 @@ const FirstTerm = () => {
   const showAlert = (severity, message) => {
     setAlert({ open: true, severity, message });
   };
+ const schoolName = JSON.parse(localStorage.getItem('school'))?.schoolName || '';
+useEffect(() => {
+  // Debug: Check what's actually in localStorage
+  const userData = JSON.parse(localStorage.getItem('user'));
+  const adminData = JSON.parse(localStorage.getItem('admin'));
+  console.log('User data:', userData);
+  console.log('Admin data:', adminData);
 
-  const schoolName = JSON.parse(localStorage.getItem('school'))?.name || '';
+  // Get school name (prioritize user data first)
+  const schoolName = userData?.schoolName || adminData?.schoolName || '';
+  console.log('Derived schoolName:', schoolName);
 
-  useEffect(() => {
-    if (!schoolName) return;
+  if (!schoolName) {
+    console.warn('No school name found in localStorage');
+    return;
+  }
 
-    const fetchStudentsAndSubjects = async () => {
-      try {
-        const studentRes = await axios.get(`http://localhost:5000/api/students/students?schoolName=${schoolName}`);
-        const subjectRes = await axios.get(`http://localhost:5000/api/subjects/all?schoolName=${schoolName}`);
+  const fetchStudentsAndSubjects = async () => {
+    try {
+      const studentRes = await axios.get(`https://gradelink.onrender.com/api/students?schoolName=${schoolName}`);
+      const subjectRes = await axios.get(`https://gradelink.onrender.com/api/subjects/all?schoolName=${schoolName}`);
 
-        const allStudents = Object.values(studentRes.data.students).flat();
-        setStudents(allStudents);
-        setSubjects(subjectRes.data.subjects || []);
-      } catch (err) {
-        console.error('Error loading data:', err);
-        showAlert('error', 'Failed to load students or subjects');
-      }
-    };
+      const allStudents = Object.values(studentRes.data.students).flat();
+      setStudents(allStudents);
+      setSubjects(subjectRes.data.subjects || []);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      showAlert('error', 'Failed to load students or subjects');
+    }
+  };
 
-    fetchStudentsAndSubjects();
-  }, [schoolName]);
-
+  fetchStudentsAndSubjects();
+}, [schoolName]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
+
+  // Get school name properly from localStorage
+  const userData = JSON.parse(localStorage.getItem('user')) || JSON.parse(localStorage.getItem('admin'));
+  const currentSchoolName = userData?.schoolName;
+  
+  if (!currentSchoolName) {
+    showAlert('error', 'School information not found');
+    return;
+  }
 
   const selectedStudent = students.find(s => s.admission_number === form.student);
   if (!selectedStudent || !form.subject || !form.exam_mark || !form.ca) {
@@ -92,7 +111,7 @@ const FirstTerm = () => {
   }];
 
   const payload = {
-    schoolName,
+    schoolName: currentSchoolName, // Use the properly retrieved school name
     className: selectedStudent.class_name,
     examData,
     sessionName: form.session,
@@ -101,8 +120,8 @@ const FirstTerm = () => {
 
   setSaving(true);
   try {
-    console.log(payload);
-    const response = await axios.post('http://localhost:5000/api/students/add-exam-score', payload);
+    console.log('Submitting payload:', payload); // Better logging
+    const response = await axios.post('https://gradelink.onrender.com/api/students/add-exam-score', payload);
     showAlert('success', 'First term exam score added');
     setForm({
       student: '',
@@ -113,13 +132,12 @@ const FirstTerm = () => {
       session: new Date().getFullYear() + '/' + (new Date().getFullYear() + 1),
     });
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error('Error details:', err.response?.data || err.message);
     showAlert('error', err.response?.data?.message || 'Failed to add exam');
   } finally {
     setSaving(false);
   }
 };
-
 
   return (
    <Box sx={{ p: 0, backgroundColor: 'white', minHeight: '600vh', position: 'relative', maxWidth: 500, mx: 'auto' ,borderRadius: 2, boxShadow: 3}}>

@@ -19,6 +19,7 @@ const Header = () => {
     }
   };
 
+   console.log("user.logo:", user?.logo);
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar sx={{ px: isSmallScreen ? 1 : 2 }}>
@@ -41,10 +42,10 @@ const Header = () => {
         </Box>
 
         {user?.logo && (
-          <Box
-            component="img"
-            src={`https://gradelink.onrender.com/uploads/${user.logo}`}
-            alt="School Logo"
+      <Box
+        component="img"
+        src={`https://gradelink.onrender.com/uploads/1752505436173-406712005.jpg`}
+        alt="School Logo"
             sx={{
               width: isSmallScreen ? 40 : 60,
               height: isSmallScreen ? 40 : 60,

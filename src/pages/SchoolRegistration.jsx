@@ -53,40 +53,19 @@ const SchoolRegistration = () => {
 
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
-    
-    if (type === 'file' && files && files[0]) {
-      // Validate file before setting
-      if (files[0].size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
-        return;
-      }
-      if (!['image/jpeg', 'image/png'].includes(files[0].type)) {
-        setError('Only JPEG and PNG images are allowed');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result);
-      };
-      reader.readAsDataURL(files[0]);
-
-      setFormData(prev => ({
-        ...prev,
-        [name]: files[0]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }));
-    }
-    
-    // Clear error when user makes changes
-    if (error) setError(null);
-  };
+ const handleChange = (e) => {
+  if (e.target.name === 'school_logo') {
+    setFormData((prev) => ({
+      ...prev,
+      school_logo: e.target.files[0],
+    }));
+  } else {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  }
+};
 
   const validateStep = (step) => {
     const errors = [];
@@ -170,6 +149,7 @@ const handleSubmit = async (e) => {
     setLoading(false);
   }
 };
+
 
   if (loading) {
     return (

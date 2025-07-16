@@ -55,20 +55,23 @@ const ViewThirdTerm = () => {
 
   const term = 'Third Term';
 
-  useEffect(() => {
-    const schoolData = JSON.parse(localStorage.getItem('school')) || {};
-    setSchool({
-      name: schoolData.name || 'MUHAMMAD BELLO COLLAGE',
-      logo: schoolData.logo ? `http://localhost:5000/uploads/logos/${schoolData.logo}` : ''
-    });
-  }, []);
+useEffect(() => {
+  // Get school data from localStorage - use 'user' or 'admin' key as shown in your logs
+  const schoolData = JSON.parse(localStorage.getItem('user')) || 
+                     JSON.parse(localStorage.getItem('admin')) || 
+                
+     setSchool({
+    name: schoolData.schoolName || '', // Use schoolName, not name
+    logo: schoolData.logo ? `https://gradelink.onrender.com/uploads/logos/${schoolData.logo}` : ''
+  });
+}, []);
 
   useEffect(() => {
     const fetchRecords = async () => {
       if (!school.name || !selectedClass || !selectedSession) return;
 
       try {
-        const res = await axios.get(`http://localhost:5000/api/students/get-exam-records`, {
+        const res = await axios.get(`https://gradelink.onrender.com/api/students/get-exam-records`, {
           params: {
             schoolName: school.name,
             className: selectedClass,
@@ -159,7 +162,7 @@ const ViewThirdTerm = () => {
     try {
       // Construct the full photo URL
       const photoUrl = student.student_photo 
-        ? `http://localhost:5000${student.student_photo}`
+        ? `https://gradelink.onrender.com${student.student_photo}`
         : null;
 
       // Preload the image

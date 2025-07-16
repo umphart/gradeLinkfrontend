@@ -43,80 +43,102 @@ const SecondTerm = () => {
   const showAlert = (severity, message) => {
     setAlert({ open: true, severity, message });
   };
+const schoolName = JSON.parse(localStorage.getItem('school'))?.schoolName || '';
+ useEffect(() => {
+  // Debug: Check what's actually in localStorage
+  const userData = JSON.parse(localStorage.getItem('user'));
+  const adminData = JSON.parse(localStorage.getItem('admin'));
+  console.log('User data:', userData);
+  console.log('Admin data:', adminData);
 
-  const schoolName = JSON.parse(localStorage.getItem('school'))?.name || '';
+  // Get school name (prioritize user data first)
+  const schoolName = userData?.schoolName || adminData?.schoolName || '';
+  console.log('Derived schoolName:', schoolName);
 
-  useEffect(() => {
-    if (!schoolName) return;
+  if (!schoolName) {
+    console.warn('No school name found in localStorage');
+    return;
+  }
 
-    const fetchData = async () => {
-      try {
-        const studentRes = await axios.get(`http://localhost:5000/api/students/students?schoolName=${schoolName}`);
-        const subjectRes = await axios.get(`http://localhost:5000/api/subjects/all?schoolName=${schoolName}`);
-        const allStudents = Object.values(studentRes.data.students).flat();
+  const fetchStudentsAndSubjects = async () => {
+    try {
+      const studentRes = await axios.get(`https://gradelink.onrender.com/api/students?schoolName=${schoolName}`);
+      const subjectRes = await axios.get(`https://gradelink.onrender.com/api/subjects/all?schoolName=${schoolName}`);
 
-        setStudents(allStudents);
-        setSubjects(subjectRes.data.subjects || []);
-      } catch (err) {
-        console.error('Fetch error:', err);
-        showAlert('error', 'Failed to load students or subjects');
-      }
-    };
+      const allStudents = Object.values(studentRes.data.students).flat();
+      setStudents(allStudents);
+      setSubjects(subjectRes.data.subjects || []);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      showAlert('error', 'Failed to load students or subjects');
+    }
+  };
 
-    fetchData();
-  }, [schoolName]);
+  fetchStudentsAndSubjects();
+}, [schoolName]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const selectedStudent = students.find(s => s.admission_number === form.student);
-    if (!selectedStudent || !form.subject || !form.ca || !form.exam_mark) {
-      showAlert('warning', 'Please fill all fields');
-      return;
-    }
+  // Get school name properly from localStorage
+  const userData = JSON.parse(localStorage.getItem('user')) || JSON.parse(localStorage.getItem('admin'));
+  const currentSchoolName = userData?.schoolName;
+  
+  if (!currentSchoolName) {
+    showAlert('error', 'School information not found');
+    return;
+  }
 
-    const examData = [{
-      student_name: selectedStudent.full_name.trim(),
-      admission_number: selectedStudent.admission_number.trim(),
-      subject: form.subject.trim(),
-      ca: parseInt(form.ca),
-      exam_mark: parseInt(form.exam_mark),
-      term: form.term.trim(),
-      session: form.session.trim(),
-    }];
+  const selectedStudent = students.find(s => s.admission_number === form.student);
+  if (!selectedStudent || !form.subject || !form.exam_mark || !form.ca) {
+    showAlert('warning', 'Please fill all fields');
+    return;
+  }
 
-    const payload = {
-      schoolName,
-      className: selectedStudent.class_name,
-      examData,
-      sessionName: form.session,
-      termName: form.term
-    };
+  const examData = [{
+    student_name: selectedStudent.full_name.trim(),
+    admission_number: selectedStudent.admission_number.trim(),
+    subject: form.subject.trim(),
+    ca: parseInt(form.ca),
+    exam_mark: parseInt(form.exam_mark),
+    term: form.term.trim(),
+    session: form.session.trim(),
+  }];
 
-    setSaving(true);
-    try {
-      await axios.post('http://localhost:5000/api/students/add-exam-score', payload);
-      showAlert('success', 'Second term exam score added successfully');
-      setForm({
-        student: '',
-        subject: '',
-        ca: '',
-        exam_mark: '',
-        term: 'Second Term',
-        session: new Date().getFullYear() + '/' + (new Date().getFullYear() + 1),
-      });
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      showAlert('error', err.response?.data?.message || 'Failed to add exam score');
-    } finally {
-      setSaving(false);
-    }
+  const payload = {
+    schoolName: currentSchoolName, // Use the properly retrieved school name
+    className: selectedStudent.class_name,
+    examData,
+    sessionName: form.session,
+    termName: form.term
   };
+
+  setSaving(true);
+  try {
+    console.log('Submitting payload:', payload); // Better logging
+    const response = await axios.post('https://gradelink.onrender.com/api/students/add-exam-score', payload);
+    showAlert('success', 'First term exam score added');
+    setForm({
+      student: '',
+      subject: '',
+      ca: '',
+      exam_mark: '',
+      term: 'Second Term',
+      session: new Date().getFullYear() + '/' + (new Date().getFullYear() + 1),
+    });
+  } catch (err) {
+    console.error('Error details:', err.response?.data || err.message);
+    showAlert('error', err.response?.data?.message || 'Failed to add exam');
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   return (
         <Box sx={{ p: 0, backgroundColor: 'white', minHeight: '600vh', position: 'relative', maxWidth: 500, mx: 'auto' ,borderRadius: 2, boxShadow: 3}}>
