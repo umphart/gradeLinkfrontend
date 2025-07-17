@@ -50,10 +50,16 @@ const handleSubmit = async (e) => {
     if (response.data.message === 'Login successful') {
       const { user } = response.data;
       
-      // Log the school name to console
-      console.log('Logged in to school:', user.schoolName); // Assuming the school name is in user.schoolName
+      // Log the school details to console
+      console.log('Login successful for school:', {
+        name: user.schoolName,
+        logo: user.logo,
+        fullLogoUrl: user.logo 
+          ? `https://gradelink.onrender.com${user.logo}`
+          : 'No logo available'
+      });
       
-      // For now, store user data directly (add JWT later)
+      // Store user data
       localStorage.setItem('admin', JSON.stringify(user));
       login(user); // Update auth context
 

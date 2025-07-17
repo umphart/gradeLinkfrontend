@@ -19,7 +19,28 @@ const Header = () => {
     }
   };
 
-   console.log("user.logo:", user?.logo);
+  // Construct the proper logo URL
+  const getLogoUrl = () => {
+    if (!user?.logo) return null;
+    
+    // If logo is already a full URL (like from cloud storage)
+    if (user.logo.startsWith('http')) {
+      return user.logo;
+    }
+    
+    // For locally stored logos
+    return `https://gradelink.onrender.com${user.logo}`;
+  };
+
+  const logoUrl = getLogoUrl();
+
+  // Log the logo URL for debugging
+  console.log('Header logo URL:', {
+    rawLogo: user?.logo,
+    constructedUrl: logoUrl,
+    userData: user
+  });
+
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar sx={{ px: isSmallScreen ? 1 : 2 }}>
@@ -41,17 +62,23 @@ const Header = () => {
           </Typography>
         </Box>
 
-        {user?.logo && (
-      <Box
-        component="img"
-        src={`https://gradelink.onrender.com/uploads/1752505436173-406712005.jpg`}
-        alt="School Logo"
+        {logoUrl && (
+          <Box
+            component="img"
+            src={logoUrl}
+            alt="School Logo"
             sx={{
               width: isSmallScreen ? 40 : 60,
               height: isSmallScreen ? 40 : 60,
               borderRadius: 2,
               mx: isSmallScreen ? 1 : 2,
-              display: { xs: 'none', sm: 'block' }, // hide on very small screens
+              display: { xs: 'none', sm: 'block' },
+              objectFit: 'cover',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
+            onError={(e) => {
+              console.error('Failed to load logo:', logoUrl);
+              e.target.style.display = 'none';
             }}
           />
         )}

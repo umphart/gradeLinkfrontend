@@ -57,7 +57,7 @@ const Teachers = () => {
   const fetchTeachers = async () => {
     try {
       // Log school name before fetching
-      const schoolData = JSON.parse(localStorage.getItem('school') || '{}');
+      const schoolData = JSON.parse(localStorage.getItem('user') || '{}');
       console.log('Fetching teachers for school:', schoolData.schoolName);
       
       const data = await getTeachers();
